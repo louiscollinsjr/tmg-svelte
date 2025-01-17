@@ -13,7 +13,7 @@ export async function connectToDatabase(): Promise<Db> {
   try {
     client = new MongoClient(uri);
     await client.connect();
-    db = client.db('tmg-ai-assist-db'); // Your database name
+    db = client.db('test'); // Your database name
     console.log("Successfully connected to MongoDB");
 
     return db;
