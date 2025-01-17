@@ -1,5 +1,6 @@
 // svelte.config.js
-import { loadEnvConfig } from "@next/env";
+import pkg from '@next/env';
+const { loadEnvConfig } = pkg;
 import adapter from '@sveltejs/adapter-vercel';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 

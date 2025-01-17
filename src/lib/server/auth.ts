@@ -8,8 +8,6 @@ import { GITHUB_ID, GITHUB_SECRET, GOOGLE_ID, GOOGLE_SECRET, AUTH_SECRET, MONGOD
 const uri = MONGODB_URI;
 const client = new MongoClient(uri);
 
-
-
 export const authHandler = SvelteKitAuth({
     adapter: MongoDBAdapter(client),
     providers: [
