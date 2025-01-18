@@ -98,8 +98,8 @@
         </div>
 
         <div class="form-group">
-            <label>Project Tags</label>
-            <div class="tags-container">
+            <label for="project-tags">Project Tags</label>
+            <div class="tags-container" id="project-tags" role="group" aria-label="Project tags">
                 {#each tags as tag}
                     <label class="tag-checkbox">
                         <input 
