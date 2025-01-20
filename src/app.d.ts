@@ -11,11 +11,15 @@ declare global {
 		// interface PageState {}
 		// interface Platform {}
 	}
-	
-	declare namespace svelteHTML {
-		interface HTMLAttributes<T> {
-			[key: string]: any;
-		}
+}
+
+declare module "*.svelte" {
+	export { SvelteComponent as default } from "svelte";
+}
+
+declare namespace svelteHTML {
+	interface HTMLAttributes<T> {
+		[key: string]: any;
 	}
 }
 

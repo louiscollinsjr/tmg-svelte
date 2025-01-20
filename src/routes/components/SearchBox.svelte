@@ -1,36 +1,90 @@
 <!-- src/routes/components/SearchBox.svelte -->
 <script lang="ts">
+    import { onMount, onDestroy } from 'svelte';
     import { MagnifyingGlass } from 'phosphor-svelte';
-    import { goto } from '$app/navigation';
+    //import { MagnifyingGlass2 } from 'phosphor-svelte/lib/MagnifyingGlass';
     
-    let searchQuery = '';
+    const phrases = [
+      "I need a plumber...",
+      "I need a plumber to fish my wedding ring out of the garbage disposal...",
+      "A carpenter to rebuild my confidenceafter my IKEA furniture assembly",
+      "We need a electrician...",
+      "Roof expert to stop my attic from becoming an indoor swimming pool...",
+      "Lawn ninja to defeat my suburban jungle...",
+    ];
     
-    function handleSubmit() {
-        if (searchQuery.trim()) {
-            goto(`/explore-designs?q=${encodeURIComponent(searchQuery.trim())}`);
-        }
+    let placeholderText = "";
+    let phraseIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    let inputValue = "";
+    let isFocused = false;
+    let timer: ReturnType<typeof setTimeout>;
+  
+    function handleFocus() {
+        isFocused = true;
+        placeholderText = "";
     }
+  
+      function handleBlur() {
+          if (!inputValue) {
+          isFocused = false;
+          charIndex = 0;
+          }
+      }
+    
+    onMount(() => {
+          if (!isFocused) {
+              const typingSpeed = 100;
+              const deletingSpeed = 50;
+              const pauseDuration = 2000;
+  
+              const typewriterEffect = () => {
+                const currentPhrase = phrases[phraseIndex];
+  
+                if (!isDeleting) {
+                  if (charIndex < currentPhrase.length) {
+                    placeholderText = currentPhrase.substring(0, charIndex + 1);
+                    charIndex += 1;
+                  } else {
+                    setTimeout(() => isDeleting = true, pauseDuration);
+                    return;
+                  }
+                } else {
+                  if (charIndex > 0) {
+                    placeholderText = currentPhrase.substring(0, charIndex - 1);
+                      charIndex -= 1;
+                  } else {
+                    isDeleting = false;
+                    phraseIndex = (phraseIndex + 1) % phrases.length;
+                    return;
+                  }
+                }
+              };
+              timer = setInterval(
+                  typewriterEffect,
+                  isDeleting ? deletingSpeed : typingSpeed
+              );
+        }
+    });
+  
+    onDestroy(() => {
+      clearInterval(timer);
+    });
+  
 </script>
 
-<form 
-    on:submit|preventDefault={handleSubmit}
-    class="flex max-w-xl mx-auto"
->
-    <div class="relative flex-grow">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <MagnifyingGlass weight="bold" class="h-5 w-5 text-gray-400" />
+  <div class="relative w-full py-2 pb-16" style="background-image: linear-gradient(to right, transparent, rgb(229 231 235) 15%, rgb(229 231 235) 85%, transparent); background-position: bottom; background-size: 100% 1px; background-repeat: no-repeat;">
+      <div class="relative flex items-start w-full overflow-hidden rounded-2xl bg-white p-4 border border-gray-100 shadow-sm">
+          <div class="absolute left-[12px] top-[12px] p-4 rounded-full bg-orange-500">
+             <MagnifyingGlass size={20} weight="bold" class="text-white" />
         </div>
-        <input
-            bind:value={searchQuery}
-            type="text"
-            placeholder="Search for professionals or services..."
-            class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-sm placeholder-gray-500"
-        />
+          <textarea
+              bind:value={inputValue}
+              on:focus={handleFocus}
+              on:blur={handleBlur}
+              placeholder={placeholderText}
+              class="w-full font-bold pl-16 pr-4 text-3xl text-gray-900 placeholder-gray-300 bg-transparent outline-none resize-none h-42 leading-tight"
+          ></textarea>
     </div>
-    <button
-        type="submit"
-        class="px-6 py-3 bg-orange-500 text-white font-medium rounded-r-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-    >
-        Search
-    </button>
-</form>
+  </div>

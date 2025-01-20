@@ -30,7 +30,7 @@
     }
 </script>
 
-<nav class="fixed top-0 w-full z-50 px-4 pb-8 px-0">
+<nav class="fixed top-0 w-full z-50 pb-8 px-0">
     {#if session?.user}
       <div class={`backdrop-blur-sm bg-zinc-100/30 py-8 relative z-[60] ${isMenuOpen ? 'bg-zinc-100' : ''}`}>
         <div class="max-w-5xl mx-auto px-4 sm:px-[22px]">
