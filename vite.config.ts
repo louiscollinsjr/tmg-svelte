@@ -11,5 +11,14 @@ export default defineConfig({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide'
 		})
-	]
+	],
+	ssr: {
+		noExternal: ['@inlang/paraglide-js'],
+		external: ['mongoose']
+	},
+	build: {
+		rollupOptions: {
+			external: ['mongoose']
+		}
+	}
 });

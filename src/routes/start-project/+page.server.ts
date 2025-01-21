@@ -1,14 +1,35 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { connectToDatabase } from '$lib/server/db';
-import { ObjectId } from 'mongodb';
+import { connectDB } from '$lib/server/db';
+import mongoose from 'mongoose';
+import { getUserModel } from '$lib/server/models/user';
+import { getProjectModel } from '$lib/server/models/project';
+import { getUserInteractionModel } from '$lib/server/models/userInteraction';
+
+// Import the ServiceCategory model
+const serviceCategorySchema = new mongoose.Schema({
+    name: String,
+    slug: String,
+    icon: String,
+    description: String,
+    options: [{
+        id: String,
+        name: String,
+        slug: String,
+        description: String,
+        popular: Boolean
+    }]
+});
+
+const ServiceCategory = mongoose.models.ServiceCategory || 
+    mongoose.model('ServiceCategory', serviceCategorySchema);
 
 export const load: PageServerLoad = async ({ locals }) => {
     try {
-        const db = await connectToDatabase();
+        await connectDB();
         
         // Fetch service categories for the form
-        const serviceCategories = await db.collection('servicecategories').find({}).toArray();
+        const serviceCategories = await ServiceCategory.find({}).lean();
 
         return {
             serviceCategories: serviceCategories.map(category => ({
@@ -31,13 +52,15 @@ export const actions: Actions = {
 
         try {
             const formData = await request.formData();
-            const db = await connectToDatabase();
+            await connectDB();
+            const Project = getProjectModel();
+            const UserInteraction = getUserInteractionModel();
 
             // Create the project document
-            const projectData = {
+            const project = new Project({
                 title: formData.get('title'),
                 description: formData.get('description'),
-                owner: new ObjectId(session.user.id),
+                owner: new mongoose.Types.ObjectId(session.user.id),
                 status: 'planning',
                 tags: [formData.get('projectType')],
                 images: JSON.parse(formData.get('images')?.toString() || '[]'),
@@ -57,28 +80,25 @@ export const actions: Actions = {
                 updates: [],
                 createdAt: new Date(),
                 updatedAt: new Date()
-            };
+            });
 
-            const result = await db.collection('projects').insertOne(projectData);
+            const savedProject = await project.save();
 
-            if (result.acknowledged) {
-                // Create initial interaction
-                await db.collection('userinteractions').insertOne({
-                    userId: new ObjectId(session.user.id),
-                    type: 'create',
-                    targetId: result.insertedId,
-                    targetModel: 'Project',
-                    metadata: {
-                        source: 'project-wizard',
-                        status: 'planning'
-                    },
-                    createdAt: new Date()
-                });
+            // Create initial interaction
+            const interaction = new UserInteraction({
+                userId: new mongoose.Types.ObjectId(session.user.id),
+                type: 'create',
+                targetId: savedProject._id,
+                targetModel: 'Project',
+                metadata: {
+                    source: 'project-wizard',
+                    status: 'planning'
+                },
+                createdAt: new Date()
+            });
 
-                return { success: true, projectId: result.insertedId.toString() };
-            } else {
-                throw error(500, 'Failed to create project');
-            }
+            await interaction.save();
+            return { success: true, projectId: savedProject._id.toString() };
         } catch (err) {
             console.error('Error creating project:', err);
             throw error(500, 'Failed to create project');

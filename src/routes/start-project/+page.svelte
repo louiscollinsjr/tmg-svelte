@@ -150,8 +150,9 @@
 							<h2 class="font-sourceserif text-3xl font-normal text-gray-900">Tell us about your project</h2>
 
 							<div>
-								<label class="mb-2 block text-sm font-medium text-gray-700">Project Type</label>
+								<label for="project-type" class="mb-2 block text-sm font-medium text-gray-700">Project Type</label>
 								<select
+									id="project-type"
 									bind:value={$formData.projectType}
 									class="w-full rounded-lg border border-gray-300 bg-[#f8f7f3] px-3 py-2 focus:border-black focus:ring-black"
 									required
@@ -164,10 +165,11 @@
 							</div>
 
 							<div>
-								<label class="mb-2 block text-sm font-medium text-gray-700"
+								<label for="project-description" class="mb-2 block text-sm font-medium text-gray-700"
 									>Project Description</label
 								>
 								<textarea
+									id="project-description"
 									bind:value={$formData.description}
 									class="w-full rounded-lg border border-gray-300 bg-[#f8f7f3] px-3 py-2 focus:border-black focus:ring-black"
 									rows="4"
@@ -177,7 +179,7 @@
 							</div>
 
 							<div>
-								<label class="mb-2 block text-sm font-medium text-gray-700"
+								<label for="project-photos" class="mb-2 block text-sm font-medium text-gray-700"
 									>Upload Photos (optional)</label
 								>
 								<div
@@ -234,7 +236,7 @@
 							</div>
 
 							<div>
-								<label class="mb-2 block text-sm font-medium text-[#f7f8f3]"
+								<label for="optional-photos" class="mb-2 block text-sm font-medium text-[#f7f8f3]"
 									>Upload Photos (optional)</label
 								>
 								<div
@@ -290,8 +292,9 @@
 							</div>
 
 							<div>
-								<label class="mb-2 block text-sm font-medium text-gray-700">Budget Range</label>
+								<label for="budget-range" class="mb-2 block text-sm font-medium text-gray-700">Budget Range</label>
 								<select
+									id="budget-range"
 									bind:value={$formData.budget}
 									class="w-full rounded-lg border border-gray-300 bg-[#f8f7f3] px-3 py-2 focus:border-black focus:ring-black"
 									required
@@ -306,8 +309,9 @@
 							</div>
 
 							<div>
-								<label class="mb-2 block text-sm font-medium text-gray-700">Timeline</label>
+								<label for="timeline" class="mb-2 block text-sm font-medium text-gray-700">Timeline</label>
 								<select
+									id="timeline"
 									bind:value={$formData.timeline}
 									class="w-full rounded-lg border border-gray-300 bg-[#f8f7f3] px-3 py-2 focus:border-black focus:ring-black"
 									required
@@ -336,8 +340,9 @@
 							</div>
 
 							<div>
-								<label class="mb-2 block text-sm font-medium text-gray-700">Name</label>
+								<label for="name" class="mb-2 block text-sm font-medium text-gray-700">Name</label>
 								<input
+									id="name"
 									type="text"
 									bind:value={$formData.name}
 									class="w-full rounded-lg border border-gray-300 bg-[#f8f7f3] px-3 py-2 focus:border-black focus:ring-black"
@@ -347,8 +352,9 @@
 
 							<div class="grid grid-cols-2 gap-4">
 								<div>
-									<label class="mb-2 block text-sm font-medium text-gray-700">City</label>
+									<label for="city" class="mb-2 block text-sm font-medium text-gray-700">City</label>
 									<input
+										id="city"
 										type="text"
 										bind:value={$formData.city}
 										class="w-full rounded-lg border border-gray-300 bg-[#f8f7f3] px-3 py-2 focus:border-black focus:ring-black"
@@ -356,8 +362,9 @@
 									/>
 								</div>
 								<div>
-									<label class="mb-2 block text-sm font-medium text-gray-700">State</label>
+									<label for="state" class="mb-2 block text-sm font-medium text-gray-700">State</label>
 									<input
+										id="state"
 										type="text"
 										bind:value={$formData.state}
 										class="w-full rounded-lg border border-gray-300 bg-[#f8f7f3] px-3 py-2 focus:border-black focus:ring-black"

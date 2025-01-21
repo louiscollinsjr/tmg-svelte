@@ -1,14 +1,42 @@
 import type { PageServerLoad } from './$types';
-import { connectToDatabase } from '$lib/server/db';
+import { connectDB } from '$lib/server/db';
 import type { Professional, ServiceCategory } from '$lib/types/professional';
+import mongoose, { Model, Schema } from 'mongoose';
+import { getUserModel } from '$lib/server/models/user';
+import { getReviewModel } from '$lib/server/models/review';
+import { getProjectModel } from '$lib/server/models/project';
+
+// Define ServiceCategory Schema
+const serviceCategorySchema = new Schema({
+    slug: String,
+    name: String,
+    icon: String,
+    description: String,
+    options: [
+        {
+            id: String,
+            name: String,
+            slug: String,
+            description: String,
+            popular: Boolean
+        }
+    ]
+});
+
+// Create or get the model
+const ServiceCategoryModel: Model<ServiceCategory> = mongoose.models.ServiceCategory || 
+    mongoose.model('ServiceCategory', serviceCategorySchema);
 
 export const load: PageServerLoad = async () => {
-    const db = await connectToDatabase();
+    await connectDB();
+    const User = getUserModel();
+    const Review = getReviewModel();
+    const Project = getProjectModel();
     
     // Fetch categories
-    const dbCategories = await db.collection('servicecategories').find({}).toArray();
+    const dbCategories = await ServiceCategoryModel.find({}).lean<ServiceCategory>();
     
-    const allProfessionalsCategory = {
+    const allProfessionalsCategory: ServiceCategory = {
         slug: 'all-professionals',
         name: 'All Professionals',
         icon: 'warehouse',
@@ -33,11 +61,11 @@ export const load: PageServerLoad = async () => {
     ];
 
     // Fetch professionals with their review data and project images
-    const professionalsWithReviews = await db.collection('users').aggregate([
+    const professionalsWithReviews = await User.aggregate([
         { $match: { isPro: true } },
         {
             $lookup: {
-                from: 'reviews',
+                from: Review.collection.name,
                 let: { professionalId: '$_id' },
                 pipeline: [
                     {
@@ -52,7 +80,7 @@ export const load: PageServerLoad = async () => {
         },
         {
             $lookup: {
-                from: 'projects',
+                from: Project.collection.name,
                 let: { professionalId: '$_id' },
                 pipeline: [
                     {
@@ -79,7 +107,7 @@ export const load: PageServerLoad = async () => {
                     {
                         $project: {
                             _id: 0,
-                            projectImages: { $slice: ['$projectImages', 4] } // Limit to 4 images per professional
+                            projectImages: { $slice: ['$projectImages', 4] }
                         }
                     }
                 ],
@@ -101,7 +129,7 @@ export const load: PageServerLoad = async () => {
                 }
             }
         }
-    ]).toArray();
+    ]);
 
     return { 
         categories,
@@ -128,7 +156,7 @@ export const load: PageServerLoad = async () => {
             projectImages: pro.projectImages.map(img => ({
                 url: img.url,
                 caption: img.caption,
-                _id: img._id ? img._id.toString() : undefined
+                _id: img._id.toString()
             }))
         }))
     };

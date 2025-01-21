@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { User } from '$lib/models/user';
+import { getUserModel } from '$lib/server/models/user';
 import type { RequestHandler } from './$types';
 import { connectDB } from '$lib/server/db';
 
@@ -11,6 +11,7 @@ export const GET: RequestHandler = async ({ locals }) => {
         return new Response('Unauthorized', { status: 401 });
     }
 
+    const User = getUserModel();
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
         return new Response('User not found', { status: 404 });
@@ -28,6 +29,7 @@ export const PUT: RequestHandler = async ({ locals, request }) => {
     }
 
     const updates = await request.json();
+    const User = getUserModel();
     const user = await User.findOneAndUpdate(
         { email: session.user.email },
         { $set: updates },

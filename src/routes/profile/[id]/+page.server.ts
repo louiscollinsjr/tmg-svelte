@@ -1,9 +1,13 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { connectToDatabase } from '$lib/server/db';
-import { ObjectId } from 'mongodb';
+import { connectDB } from '$lib/server/db';
+import mongoose from 'mongoose';
+import { getUserModel } from '$lib/server/models/user';
+import { getProjectModel } from '$lib/server/models/project';
+import { getReviewModel } from '$lib/server/models/review';
+import { getUserInteractionModel } from '$lib/server/models/userInteraction';
 
-// Helper function to serialize MongoDB documents
+// Helper function to serialize Mongoose documents
 function serializeDocument(doc: any): any {
     if (!doc) return doc;
 
@@ -16,7 +20,7 @@ function serializeDocument(doc: any): any {
     if (typeof doc === 'object') {
         const serialized: any = {};
         for (const [key, value] of Object.entries(doc)) {
-            if (value instanceof ObjectId) {
+            if (value instanceof mongoose.Types.ObjectId) {
                 serialized[key] = value.toString();
             } else if (value instanceof Date) {
                 serialized[key] = value.toISOString();
@@ -35,7 +39,11 @@ function serializeDocument(doc: any): any {
 export const load: PageServerLoad = async ({ params, locals }) => {
     try {
         const session = await locals.auth();
-        const db = await connectToDatabase();
+        await connectDB();
+        const User = getUserModel();
+        const Project = getProjectModel();
+        const Review = getReviewModel();
+        const UserInteraction = getUserInteractionModel();
         
         // Get the professional's ID from the URL params
         const { id } = params;
@@ -45,10 +53,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         }
 
         // Fetch the professional's data
-        const professional = await db.collection('users').findOne({ 
-            _id: new ObjectId(id),
+        const professional = await User.findOne({ 
+            _id: new mongoose.Types.ObjectId(id),
             isPro: true 
-        });
+        }).lean();
 
         if (!professional) {
             throw error(404, 'Professional not found');
@@ -57,30 +65,26 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         // Check if the professional is saved by the current user
         let isSaved = false;
         if (session?.user?.id) {
-            const interaction = await db.collection('userinteractions').findOne({
-                userId: new ObjectId(session.user.id),
-                targetId: new ObjectId(id),
+            const interaction = await UserInteraction.findOne({
+                userId: new mongoose.Types.ObjectId(session.user.id),
+                targetId: new mongoose.Types.ObjectId(id),
                 type: 'save',
                 targetModel: 'Professional'
-            });
+            }).lean();
             isSaved = !!interaction;
         }
 
         // Fetch their reviews
-        const reviews = await db.collection('reviews')
-            .find({ 
-                contractor: new ObjectId(id),
-                status: 'published'
-            })
-            .toArray();
+        const reviews = await Review.find({ 
+            contractor: new mongoose.Types.ObjectId(id),
+            status: 'published'
+        }).lean();
 
         // Fetch their projects
-        const projects = await db.collection('projects')
-            .find({ 
-                contractor: new ObjectId(id),
-                status: 'completed'
-            })
-            .toArray();
+        const projects = await Project.find({ 
+            contractor: new mongoose.Types.ObjectId(id),
+            status: 'completed'
+        }).lean();
 
         return {
             session,

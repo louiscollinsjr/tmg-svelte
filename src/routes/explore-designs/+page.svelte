@@ -138,7 +138,8 @@
                         alt="Design preview"
                         aspectRatio={Math.random() * (1.5 - 0.8) + 0.8}
                     />
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent pointer-events-none" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent pointer-events-none">
+                    </div>
                     <div class="absolute bottom-5 right-5 flex items-center gap-1 bg-white/10 backdrop-blur-sm px-2 py-1 rounded-full text-[10px] text-white">
                         <Heart class="w-3 h-3 text-white" />
                         <span>{Math.floor(Math.random() * 999)}</span>

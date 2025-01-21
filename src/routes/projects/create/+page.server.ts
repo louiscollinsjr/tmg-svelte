@@ -1,7 +1,9 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { connectToDatabase } from '$lib/server/db';
-import { ObjectId } from 'mongodb';
+import { connectDB } from '$lib/server/db';
+import mongoose from 'mongoose';
+import { getUserModel } from '$lib/server/models/user';
+import { getProjectModel } from '$lib/server/models/project';
 
 export const load: PageServerLoad = async ({ locals }) => {
     const session = await locals.auth();
@@ -38,15 +40,17 @@ export const actions = {
             };
         }
 
-        const db = await connectToDatabase();
+        await connectDB();
+        const User = getUserModel();
+        const Project = getProjectModel();
         
         // Get user data to ensure we have the correct ObjectId
-        const userData = await db.collection('users').findOne({ 
+        const userData = await User.findOne({ 
             $or: [
-                { _id: new ObjectId(session.user.id) },
+                { _id: new mongoose.Types.ObjectId(session.user.id) },
                 { email: session.user.email }
             ]
-        });
+        }).lean();
 
         if (!userData) {
             return {
@@ -55,7 +59,7 @@ export const actions = {
             };
         }
 
-        const project = {
+        const project = new Project({
             title,
             description,
             owner: userData._id,
@@ -78,19 +82,11 @@ export const actions = {
             updates: [],
             createdAt: new Date(),
             updatedAt: new Date()
-        };
+        });
 
         try {
-            const result = await db.collection('projects').insertOne(project);
-            
-            if (result.acknowledged) {
-                throw redirect(303, `/projects/${result.insertedId}`);
-            }
-
-            return {
-                success: true,
-                projectId: result.insertedId
-            };
+            const savedProject = await project.save();
+            throw redirect(303, `/projects/${savedProject._id}`);
         } catch (error) {
             console.error('Error creating project:', error);
             return {
@@ -99,4 +95,4 @@ export const actions = {
             };
         }
     }
-} satisfies Actions;
+} as Actions;

@@ -1,3 +1,4 @@
+import type { Model } from 'mongoose';
 import mongoose from 'mongoose';
 
 const providerSchema = new mongoose.Schema({
@@ -28,7 +29,7 @@ const preferencesSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
-    name: String,
+    name: { type: String, required: true },
     image: String,
     isPro: { type: Boolean, default: false },
     providers: [providerSchema],
@@ -72,4 +73,12 @@ export type UserDocument = mongoose.Document & {
     updatedAt: Date;
 };
 
-export const User = mongoose.models.User || mongoose.model<UserDocument>('User', userSchema);
+let User: Model<UserDocument>;
+
+// This is to prevent errors with hot module reloading
+export function getUserModel(): Model<UserDocument> {
+    if (!User) {
+        User = mongoose.models.User || mongoose.model<UserDocument>('User', userSchema);
+    }
+    return User;
+}
