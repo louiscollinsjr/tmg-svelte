@@ -1,6 +1,8 @@
 <!-- src/routes/+page.svelte -->
 <script lang="ts">
     import { onMount } from 'svelte';
+    import { page } from '$app/stores';
+    import { auth } from '$lib/stores';
     import type { Professional } from '$lib/types/professional';
     import { transformProfessional } from '$lib/types/professional';
     import ProfessionalsGrid from './components/ProfessionalsGrid.svelte';
@@ -10,11 +12,27 @@
 
     export let data: PageData;
 
-    let selectedCategory: string | null = null;
+    let selectedCategory: string | null = 'all-professionals';
     let professionals: Professional[] = [];
     let filteredProfessionals: Professional[] = [];
 
+    let session = null;
+
+    auth.subscribe(value => {
+        session = value;
+        console.log('Auth Status:', {
+            isAuthenticated: !!value,
+            user: value?.user,
+            expires: value?.expires
+        });
+    });
+
     onMount(async () => {
+        console.log('Initial Auth Status:', {
+            isAuthenticated: !!session,
+            user: session?.user,
+            expires: session?.expires
+        });
         try {
             if (data?.professionals) {
                 console.log('Available Categories:', data.categories.map(c => c.slug));

@@ -58,10 +58,10 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
   {#each professionals as professional (professional._id?.$oid || professional._id)}
-       <a href={`/professionals/${professional._id?.$oid || professional._id}`} class="relative block" >
-        <div  class="pr-3 py-3 hover:bg-gray-50 transition-colors h-full relative bg-gray-100 p-4 pb-16 rounded-lg">
+       <a href={`/profile/${professional._id}`} class="relative block" >
+        <div  class="pr-3 py-3 hover:bg-gray-50 transition-colors h-full relative bg-gray-100 p-4 pb-16 rounded-lg  ">
           <div class="flex items-center mb-3">
-            <div class="flex-shrink-0 relative w-12 h-12">
+            <div class="flex-shrink-0 relative w-16 h-16">
             {#if professional.image}
               <img
                 src={professional.image}
@@ -99,24 +99,24 @@
                 {/if}
           </div>
         
-          <p class="text-xs text-gray-600 mt-1 truncate">
+          <!-- <p class="text-xs text-gray-600 mt-1 truncate">
             {professional.businessInfo?.specialties?.join(', ') || 'Various Services'}
-          </p>
+          </p> -->
           
          {#if professional.projectImages && professional.projectImages.length > 0}
          <div class="relative mt-4 w-full aspect-square">
            <img
-             src={professional.projectImages[0]}
-              alt="Project preview"
-              class="object-cover rounded-xl absolute inset-0 w-full h-full"
+             src={professional.projectImages[0].url}
+             alt={professional.projectImages[0].caption || "Project preview"}
+             class="object-cover rounded-xl absolute inset-0 w-full h-full"
            />
-            </div>
+         </div>
          {:else}
              <div class="relative mt-4 w-full aspect-square">
               <div class="w-full h-full bg-gray-200 rounded-xl flex items-center justify-center">
                    <p class="text-gray-300 text-sm">No project images</p>
-                 </div>
-               </div>
+              </div>
+             </div>
          {/if}
         
        <button class="absolute bottom-3 left-3 bg-gray-200/80 text-gray-400 font-roboto font-normal px-6 py-1 rounded-lg hover:bg-gray-800 transition-colors text-xs">
