@@ -20,12 +20,12 @@
 		state: '',
 		status: 'planning'
 	});
-
-	$: isLastStep = $currentStep === 6;
+let totalSteps = 6;
+	$: isLastStep = $currentStep === totalSteps;
 	$: isFirstStep = $currentStep === 1;
 
 	function nextStep() {
-		if ($currentStep < 5) {
+		if ($currentStep < totalSteps) {
 			currentStep.update((n) => n + 1);
 		}
 	}
