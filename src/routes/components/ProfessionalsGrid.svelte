@@ -1,6 +1,8 @@
 <!-- src/routes/components/ProfessionalsGrid.svelte -->
 <script lang="ts">
   import type { Professional } from "$lib/types/professional";
+  import type { Session } from '@auth/core/types';
+  import { page } from '$app/stores';
   import { Star, Heart } from "phosphor-svelte";
   import { onMount } from 'svelte';
   import { auth } from '$lib/stores';
@@ -10,7 +12,7 @@
   export let professionals: Professional[] = [];
   export let selectedCategory: string | null = null;
   
-  let session;
+  let session: Session | null;
 
   $: {
       console.log('ProfessionalsGrid - Selected Category:', selectedCategory);

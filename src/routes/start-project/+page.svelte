@@ -6,10 +6,25 @@
 	import { enhance } from '$app/forms';
 	import { FileArrowUp, CaretRight, Camera, KeyReturn, ArrowLeft, X } from 'phosphor-svelte';
     import { signIn } from '@auth/sveltekit/client';
+    import type { ProjectImage } from '$lib/types/professional';
 
 	export let data;
 	let currentStep = writable(1);
-	let formData = writable({
+
+    interface FormData {
+        title: string;
+        description: string;
+        projectType: string;
+        images: ProjectImage[];
+        budget: string;
+        timeline: string;
+        name: string;
+        city: string;
+        state: string;
+        status: string;
+    }
+
+	let formData = writable<FormData>({
 		title: '',
 		description: '',
 		projectType: '',
@@ -38,19 +53,20 @@
 		}
 	}
 
-	async function handleImageUpload(event) {
-		const files = event.target.files;
-		if (files) {
-			const newImages = [];
-			for (let file of files) {
-				// Here you would typically upload to your server/cloud storage
-				// For now, we'll create object URLs
-				const url = URL.createObjectURL(file);
-				newImages.push({
-					url,
-					caption: file.name
-				});
-			}
+	async function handleImageUpload(event: Event) {
+        const target = event.target as HTMLInputElement;
+        const files = target.files;
+        if (files) {
+            const newImages: ProjectImage[] = [];
+            for (let file of files) {
+                // Here you would typically upload to your server/cloud storage
+                // For now, we'll create object URLs
+                const image: ProjectImage = {
+                    url: URL.createObjectURL(file),
+                    caption: file.name
+                };
+                newImages.push(image);
+            }
 			formData.update((data) => ({
 				...data,
 				images: [...data.images, ...newImages]
@@ -58,11 +74,12 @@
 		}
 	}
 
-	async function handleSubmit(event) {
-		if (!isLastStep) {
-			nextStep();
-			return;
-		}
+	async function handleSubmit(event: Event) {
+        if (!isLastStep) {
+            event.preventDefault();
+            nextStep();
+            return;
+        }
 
 		// Final submission
 		const form = event.target;
