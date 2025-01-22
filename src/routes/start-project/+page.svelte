@@ -82,7 +82,7 @@
 	}
 </script>
 
-<div class="mx-auto min-h-screen bg-[#f8f7f3] py-12 pt-64">
+<div class="mx-auto min-h-screen bg-gray-50 py-12 pt-64">
 	<div
 		class="relative mx-auto flex min-h-[600px] max-w-5xl flex-col overflow-hidden rounded-xl bg-[#f8f7f3] pb-24 shadow-xl"
 	>

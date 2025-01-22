@@ -63,8 +63,7 @@
 
             // Sign out from the app
             await signOut({ 
-                callbackUrl: '/',
-                redirect: false
+                callbackUrl: '/'
             });
 
             // Clear Google's OAuth cache
@@ -203,18 +202,18 @@
                             Help Center
                         </a>
                         <div class="ml-auto text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                            {#if session}
+                            {#if session && session.user}
                                 <div class="relative">
                                   <button 
                                   on:click={toggleProfileMenu}
                                   class="flex items-center space-x-2 focus:outline-none"
                               >
                                   <img
-                                      src={session.user.image || '/images/default-avatar.png'}
-                                      alt={session.user.name || 'User avatar'}
+                                      src={session.user.image ?? '/images/default-avatar.png'}
+                                      alt={session.user.name ?? 'User avatar'}
                                       class="h-8 w-8 rounded-full"
                                   />
-                                  <span class="text-sm font-medium text-gray-600">{session.user.name}</span>
+                                  <span class="text-sm font-medium text-gray-600">{session.user.name ?? 'User'}</span>
                                   <CaretDown size={16} class="text-gray-600" />
                               </button>
                                     
@@ -289,7 +288,7 @@
                 Help Center
             </a>
             <div class="w-full py-4 border-b border-gray-100">
-                {#if session}
+                {#if session && session.user}
                     <div class="space-y-6">
                         <a
                             href="/profile"
