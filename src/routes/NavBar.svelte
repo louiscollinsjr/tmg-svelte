@@ -14,86 +14,106 @@
     let isProfileOpen = false;
     let isProjectMenuOpen = false;
     let menuContainer: HTMLElement;
+    let previousAuthState = false;
 
+    // Use the session directly from page data
     $: session = $page.data.session;
-    $: auth.set(session);
-    $: if (session) {
-        console.log('[NavBar] Session:', {
-            isAuthenticated: true,
-            user: session.user,
-            expires: session.expires
-        });
+
+    // Log only when auth state changes
+    $: {
+        const currentAuthState = !!session;
+        if (import.meta.env.DEV && currentAuthState !== previousAuthState) {
+            console.log('[NavBar] Auth State Change:', {
+                isAuthenticated: currentAuthState,
+                user: session?.user?.name,
+                action: currentAuthState ? 'SIGN_IN' : 'SIGN_OUT'
+            });
+            previousAuthState = currentAuthState;
+        }
     }
-      
-    function handleLinkClick() {
-        isMenuOpen = false;
-        isProfileOpen = false;
-        isProjectMenuOpen = false;
-    }
-  
+
     async function handleSignOut() {
         try {
-            // Clear auth store
-            auth.set(null);
-            
-            // Clear all auth-related cookies
+            isProfileOpen = false;
+            isMenuOpen = false;
+
+            // Clear all auth-related cookies first
             document.cookie.split(';').forEach(cookie => {
                 const [name] = cookie.split('=').map(c => c.trim());
-                if (name.startsWith('next-auth') || name.includes('auth') || name.includes('session') || name.includes('google')) {
+                if (name.startsWith('next-auth') || 
+                    name.includes('auth') || 
+                    name.includes('session') || 
+                    name.includes('oauth') ||
+                    name.includes('google')) {
                     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+                    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/auth`;
                 }
             });
             
             // Clear localStorage and sessionStorage
-            ['auth', 'session', 'token'].forEach(key => {
+            ['auth', 'session', 'token', 'oauth', 'google'].forEach(key => {
                 localStorage.removeItem(key);
                 localStorage.removeItem(`${key}.state`);
                 sessionStorage.removeItem(key);
                 sessionStorage.removeItem(`${key}.state`);
             });
-            
-            // Sign out with redirect
+
+            // Clear auth store
+            auth.set(null);
+
+            // Sign out from the app
             await signOut({ 
                 callbackUrl: '/',
-                redirect: true
+                redirect: false
             });
-            
-            // Invalidate SvelteKit data
-            await invalidateAll();
-            
-            // Clear Google's OAuth cache by redirecting to Google's logout URL
+
+            // Clear Google's OAuth cache
             const googleLogoutUrl = 'https://accounts.google.com/logout';
             const iframe = document.createElement('iframe');
             iframe.style.display = 'none';
             iframe.src = googleLogoutUrl;
             document.body.appendChild(iframe);
-            
-            // Remove the iframe after a short delay
+
+            // Remove the iframe and perform final cleanup
             setTimeout(() => {
                 iframe.remove();
-                // Force reload to clear any remaining state
-                window.location.href = '/';
+                // Force a hard reload to clear any remaining state
+                window.location.replace('/');
             }, 1000);
-            
-            isProfileOpen = false;
-            isMenuOpen = false;
         } catch (error) {
             console.error('[NavBar] Sign-out error:', error);
             // Force reload as fallback
-            window.location.href = '/';
+            window.location.replace('/');
         }
     }
 
     async function handleSignIn(e: Event) {
         e.preventDefault();
         try {
+            // Clear any existing auth state before signing in
+            document.cookie.split(';').forEach(cookie => {
+                const [name] = cookie.split('=').map(c => c.trim());
+                if (name.startsWith('next-auth') || name.includes('auth')) {
+                    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+                }
+            });
+
+            // Clear auth store
+            auth.set(null);
+
             await signIn('google', { 
                 callbackUrl: window.location.pathname,
-                prompt: 'select_account'  // Force Google account selection
+                prompt: 'select_account'
             });
         } catch (error) {
             console.error('[NavBar] Sign-in error:', error);
         }
+    }
+  
+    function handleLinkClick() {
+        isMenuOpen = false;
+        isProfileOpen = false;
+        isProjectMenuOpen = false;
     }
   
     function toggleProfileMenu() {
@@ -165,11 +185,11 @@
                                     <div class="py-1" role="menu">
                                         <a
                                             href="/start-project"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:text-[#ff6923]"
                                             role="menuitem"
                                             on:click={handleLinkClick}
                                         >
-                                            Submit a project
+                                            Start a project
                                         </a>
                                     </div>
                                 </div>
@@ -203,14 +223,14 @@
                                             <div class="py-1" role="menu">
                                                 <a
                                                     href="/profile"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                    class="block px-4 py-2 text-sm text-gray-700 hover:text-[#ff6923]"
                                                     role="menuitem"
                                                 >
                                                     Your Profile
                                                 </a>
                                                 <button
                                                     on:click={handleSignOut}
-                                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:text-[#ff6923]"
                                                     role="menuitem"
                                                 >
                                                     Sign out

@@ -31,6 +31,14 @@ export const authHandler = SvelteKitAuth({
         maxAge: 24 * 60 * 60, // 24 hours
         updateAge: 60 * 60, // 1 hour
     },
+    events: {
+        async signOut({ session, token }) {
+            // Ensure token is invalidated
+            if (token) {
+                token.exp = 0;
+            }
+        }
+    },
     callbacks: {
         async signIn({ user, account, profile }) {
             try {
@@ -88,24 +96,26 @@ export const authHandler = SvelteKitAuth({
         },
         async jwt({ token, user, account, trigger }) {
             if (trigger === "signOut") {
-                // Invalidate the token completely
+                // Return null to invalidate the token completely
                 return null;
             }
             
             if (account && user) {
                 token.id = user.id;
                 token.lastVerified = Date.now();
-                // Store the access token for revoking later
-                if (account.access_token) {
-                    token.accessToken = account.access_token;
-                }
+                // Store provider info
+                token.provider = account.provider;
+                token.accessToken = account.access_token;
             }
             return token;
         },
         async session({ session, token }) {
+            if (!token) {
+                return null;
+            }
+            
             if (session.user) {
-                session.user.id = token.id;
-                // Add a timestamp to track when the session was last verified
+                session.user.id = token.id as string;
                 session.lastVerified = Date.now();
             }
             return session;

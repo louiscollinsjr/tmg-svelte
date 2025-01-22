@@ -16,39 +16,21 @@
     let professionals: Professional[] = [];
     let filteredProfessionals: Professional[] = [];
 
-    let session = null;
-
-    auth.subscribe(value => {
-        session = value;
-        console.log('Auth Status:', {
-            isAuthenticated: !!value,
-            user: value?.user,
-            expires: value?.expires
-        });
-    });
+    // Use the session from page data and update auth store
+    $: session = $page.data.session;
+    $: if (session) {
+        auth.set(session);
+    }
 
     onMount(async () => {
-        console.log('Initial Auth Status:', {
-            isAuthenticated: !!session,
-            user: session?.user,
-            expires: session?.expires
-        });
         try {
             if (data?.professionals) {
                 console.log('Available Categories:', data.categories.map(c => c.slug));
                 console.log('Parent - Selected Category:', selectedCategory);
-                console.log('Parent - All Professionals:', data.professionals);
                 
                 professionals = data.professionals.map(professional => {
-                    const transformed = transformProfessional(professional);
-                    console.log('Transformed Professional:', {
-                        name: transformed.name,
-                        selectedServices: transformed.selectedServices
-                    });
-                    return transformed;
+                    return transformProfessional(professional);
                 });
-                
-                console.log('Parent - Filtered Professionals:', professionals);
             }
         } catch (error) {
             console.error('Error fetching professionals:', error);
@@ -59,23 +41,9 @@
     $: {
         console.log('Selected Category:', selectedCategory);
         if (selectedCategory && selectedCategory !== 'all-professionals') {
-            const filtered = professionals.filter(p => {
-                console.log('Checking professional:', {
-                    name: p.name,
-                    selectedServices: p.selectedServices
-                });
-                const hasMatchingService = p.selectedServices?.some(service => {
-                    console.log('Comparing:', {
-                        serviceCategory: service.categoryId,
-                        selectedCategory,
-                        professional: p.name
-                    });
-                    return service.categoryId === selectedCategory;
-                });
-                return hasMatchingService;
+            filteredProfessionals = professionals.filter(p => {
+                return p.selectedServices?.some(service => service.categoryId === selectedCategory);
             });
-            console.log('Filtered Professionals:', filtered);
-            filteredProfessionals = filtered;
         } else {
             filteredProfessionals = professionals;
         }
