@@ -12,37 +12,62 @@
       
     let isMenuOpen = false;
     let isProfileOpen = false;
-    let session: Session | null = null;
+    let isProjectMenuOpen = false;
     let menuContainer: HTMLElement;
 
-    auth.subscribe(value => {
-        session = value;
-    });
+    $: session = $page.data.session;
+    $: auth.set(session);
+    $: if (session) {
+        console.log('[NavBar] Session:', {
+            isAuthenticated: true,
+            user: session.user,
+            expires: session.expires
+        });
+    }
       
     function handleLinkClick() {
         isMenuOpen = false;
         isProfileOpen = false;
+        isProjectMenuOpen = false;
     }
   
     async function handleSignOut() {
-        await signOut();
-        await invalidateAll();
-        isProfileOpen = false;
-        isMenuOpen = false;
+        try {
+            await signOut({ callbackUrl: '/' });
+            await invalidateAll();
+            isProfileOpen = false;
+            isMenuOpen = false;
+        } catch (error) {
+            console.error('[NavBar] Sign-out error:', error);
+            window.location.href = '/';
+        }
     }
 
     async function handleSignIn(e: Event) {
         e.preventDefault();
-        await signIn('google');
+        try {
+            await signIn('google', { callbackUrl: window.location.pathname });
+        } catch (error) {
+            console.error('[NavBar] Sign-in error:', error);
+        }
     }
   
     function toggleProfileMenu() {
         isProfileOpen = !isProfileOpen;
+        isProjectMenuOpen = false;
+    }
+
+    function toggleProjectMenu() {
+        isProjectMenuOpen = !isProjectMenuOpen;
+        isProfileOpen = false;
     }
 
     function toggleMenu() {
         isMenuOpen = !isMenuOpen;
-        if (isMenuOpen) isProfileOpen = false;
+        if (isMenuOpen) {
+            isProfileOpen = false;
+            isProjectMenuOpen = false;
+        }
     }
 
     function handleClickOutside(event: MouseEvent) {
@@ -82,34 +107,27 @@
                             Explore Designs
                         </a>
                         
-                        <div bind:this={menuContainer} class="relative inline-block text-left">
-                            <button
-                                on:click={toggleMenu}
-                                class="text-sm text-gray-600 hover:text-gray-900 transition-colors inline-flex items-center gap-1"
+                        <div class="relative">
+                            <button 
+                                on:click={toggleProjectMenu}
+                                class="flex items-center space-x-1 text-sm text-gray-600 hover:text-gray-900 transition-colors focus:outline-none"
                             >
-                                Hire a Tradesperson
-                                <CaretDown size={12} weight="bold" class="text-gray-400" />
+                                <span>Hire a tradesperson</span>
+                                <CaretDown size={16} />
                             </button>
-                            {#if isMenuOpen}
-                                <div class="absolute left-0 mt-2 w-48 origin-top-left rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none py-1">
-                                    <!-- <a
-                                        href="/find-professionals"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                    >
-                                        Browse Tradespersons
-                                    </a> -->
-                                    <a
-                                        href="/start-project"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                    >
-                                        Submit a Project
-                                    </a>
-                                    <!-- <a
-                                        href="/hiring-guide"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                    >
-                                        Join TryMyGuys
-                                    </a> -->
+
+                            {#if isProjectMenuOpen}
+                                <div class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                                    <div class="py-1" role="menu">
+                                        <a
+                                            href="/start-project"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            role="menuitem"
+                                            on:click={handleLinkClick}
+                                        >
+                                            Submit a project
+                                        </a>
+                                    </div>
                                 </div>
                             {/if}
                         </div>
@@ -123,13 +141,18 @@
                         <div class="ml-auto text-sm text-gray-600 hover:text-gray-900 transition-colors">
                             {#if session}
                                 <div class="relative">
-                                    <button 
-                                        on:click={toggleProfileMenu}
-                                        class="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                                    >
-                                        <span>{session.user.name || 'Profile'}</span>
-                                        <CaretDown weight="bold" class="w-4 h-4" />
-                                    </button>
+                                  <button 
+                                  on:click={toggleProfileMenu}
+                                  class="flex items-center space-x-2 focus:outline-none"
+                              >
+                                  <img
+                                      src={session.user.image || '/images/default-avatar.png'}
+                                      alt={session.user.name || 'User avatar'}
+                                      class="h-8 w-8 rounded-full"
+                                  />
+                                  <span class="text-sm font-medium text-gray-600">{session.user.name}</span>
+                                  <CaretDown size={16} class="text-gray-600" />
+                              </button>
                                     
                                     {#if isProfileOpen}
                                         <div class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
@@ -153,15 +176,12 @@
                                     {/if}
                                 </div>
                             {:else}
-                                <form method="POST" action="/auth/signin">
-                                    <button 
-                                        type="submit" 
-                                        on:click={handleSignIn}
-                                        class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                                    >
-                                        Sign in
-                                    </button>
-                                </form>
+                                <button
+                                    on:click={handleSignIn}
+                                    class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                                >
+                                    Sign in
+                                </button>
                             {/if}
                         </div>
                     </div>
@@ -221,15 +241,12 @@
                         </button>
                     </div>
                 {:else}
-                    <form method="POST" action="/auth/signin">
-                        <button 
-                            type="submit"
-                            on:click={handleSignIn} 
-                            class="text-2xl text-gray-600 hover:text-gray-900 transition-colors"
-                        >
-                            Sign in
-                        </button>
-                    </form>
+                    <button
+                        on:click={handleSignIn}
+                        class="text-2xl text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                        Sign in
+                    </button>
                 {/if}
             </div>
         </div>

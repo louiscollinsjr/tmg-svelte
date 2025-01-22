@@ -77,14 +77,20 @@ export interface Professional {
     businessInfo?: BusinessInfo;
     preferences?: Preferences;
     selectedServices?: SelectedService[];
-    lastActive?: { $date: string };
+    lastActive?: {
+        $date: string;
+    };
     status?: 'active' | 'inactive' | 'suspended';
-    createdAt?: { $date: string };
-    updatedAt?: { $date: string };
+    createdAt?: {
+        $date: string;
+    };
+    updatedAt?: {
+        $date: string;
+    };
     isFavorite?: boolean;
     rating?: number;
     reviewCount?: number;
-    projectImages?: ProjectImage[];
+    projectImages?: string[];
     categories?: string[];
 }
 
