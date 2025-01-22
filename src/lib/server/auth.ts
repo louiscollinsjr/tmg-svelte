@@ -14,13 +14,22 @@ export const authHandler = SvelteKitAuth({
         Google({
             clientId: AUTH_GOOGLE_CLIENT_ID, 
             clientSecret: AUTH_GOOGLE_CLIENT_SECRET,
-            allowDangerousEmailAccountLinking: true
+            allowDangerousEmailAccountLinking: true,
+            authorization: {
+                params: {
+                    prompt: "select_account",
+                    access_type: "offline",
+                    response_type: "code"
+                }
+            }
         }),
     ],
     secret: AUTH_SECRET,
     trustHost: true,
     session: {
-        strategy: "jwt"
+        strategy: "jwt",
+        maxAge: 24 * 60 * 60, // 24 hours
+        updateAge: 60 * 60, // 1 hour
     },
     callbacks: {
         async signIn({ user, account, profile }) {
@@ -77,15 +86,27 @@ export const authHandler = SvelteKitAuth({
                 return true; // Still allow sign in even if our user creation fails
             }
         },
-        async jwt({ token, user, account }) {
+        async jwt({ token, user, account, trigger }) {
+            if (trigger === "signOut") {
+                // Invalidate the token completely
+                return null;
+            }
+            
             if (account && user) {
                 token.id = user.id;
+                token.lastVerified = Date.now();
+                // Store the access token for revoking later
+                if (account.access_token) {
+                    token.accessToken = account.access_token;
+                }
             }
             return token;
         },
         async session({ session, token }) {
             if (session.user) {
                 session.user.id = token.id;
+                // Add a timestamp to track when the session was last verified
+                session.lastVerified = Date.now();
             }
             return session;
         }

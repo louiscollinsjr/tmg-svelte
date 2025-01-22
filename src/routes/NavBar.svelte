@@ -33,12 +33,53 @@
   
     async function handleSignOut() {
         try {
-            await signOut({ callbackUrl: '/' });
+            // Clear auth store
+            auth.set(null);
+            
+            // Clear all auth-related cookies
+            document.cookie.split(';').forEach(cookie => {
+                const [name] = cookie.split('=').map(c => c.trim());
+                if (name.startsWith('next-auth') || name.includes('auth') || name.includes('session') || name.includes('google')) {
+                    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+                }
+            });
+            
+            // Clear localStorage and sessionStorage
+            ['auth', 'session', 'token'].forEach(key => {
+                localStorage.removeItem(key);
+                localStorage.removeItem(`${key}.state`);
+                sessionStorage.removeItem(key);
+                sessionStorage.removeItem(`${key}.state`);
+            });
+            
+            // Sign out with redirect
+            await signOut({ 
+                callbackUrl: '/',
+                redirect: true
+            });
+            
+            // Invalidate SvelteKit data
             await invalidateAll();
+            
+            // Clear Google's OAuth cache by redirecting to Google's logout URL
+            const googleLogoutUrl = 'https://accounts.google.com/logout';
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = googleLogoutUrl;
+            document.body.appendChild(iframe);
+            
+            // Remove the iframe after a short delay
+            setTimeout(() => {
+                iframe.remove();
+                // Force reload to clear any remaining state
+                window.location.href = '/';
+            }, 1000);
+            
             isProfileOpen = false;
             isMenuOpen = false;
         } catch (error) {
             console.error('[NavBar] Sign-out error:', error);
+            // Force reload as fallback
             window.location.href = '/';
         }
     }
@@ -46,7 +87,10 @@
     async function handleSignIn(e: Event) {
         e.preventDefault();
         try {
-            await signIn('google', { callbackUrl: window.location.pathname });
+            await signIn('google', { 
+                callbackUrl: window.location.pathname,
+                prompt: 'select_account'  // Force Google account selection
+            });
         } catch (error) {
             console.error('[NavBar] Sign-in error:', error);
         }
