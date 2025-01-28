@@ -83,8 +83,8 @@
   </script>
   
  
-  <div class="~pt-24/80">
-      <div class="mx-auto max-w-screen-7xl px-6 lg:px-8">
+  <div class="">
+      <div class="mx-auto max-w-screen-7xl px-6 lg:px-8 pb-32">
         <!-- <div class="mx-auto ~max-w-screen-4xl/7xl text-center">
           <h2 class="~text-5xl/7xl md:~text-6xl/9xl font-bold tracking-tight text-slate-800">
               Pricing
@@ -93,7 +93,7 @@
               Choose the perfect plan for your business needs
           </p>
         </div> -->
-        <div class="isolate mx-auto mt-16 grid w-full grid-cols-1 gap-y-8 sm:max-w-xl md:max-w-3xl lg:mx-0 lg:max-w-none lg:grid-cols-4 lg:gap-x-4 xl:gap-x-4">
+        <div class="isolate mx-auto mt-16 grid w-full grid-cols-1 gap-y-8 sm:max-w-xl md:max-w-3xl lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:gap-x-4 xl:gap-x-4">
           {#each pricingTiers as tier}
               <div
                class={`rounded-3xl p-8 ring-1 ring-gray-200 ${
