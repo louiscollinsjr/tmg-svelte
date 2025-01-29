@@ -1,3 +1,5 @@
+// src/routes/projects/create/+page.server.ts
+
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { connectDB } from '$lib/server/db';

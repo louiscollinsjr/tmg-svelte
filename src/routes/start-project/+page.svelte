@@ -26,7 +26,7 @@
 	// 	zod(schemaAboutYou)
 	// ];
 
-	let step = 5;
+	let step = 1;
 	$: options.validators = zod(steps[step - 1]);
 
 	//let currentStep = writable(step);
@@ -161,9 +161,12 @@
 									required
 								>
 									<option value="">Select a project type</option>
-									{#each $form.projectTypes as projectType}
-										<option value={projectType}>{projectType}</option>
-									{/each}
+									<!-- {#each $form.projectTypes as projectType}
+										<option value={projectType}>{projectType}</option> -->
+										<option value="Cookies and cream">Cookies and cream</option>
+										<option value="Mint choc chip">Mint choc chip</option>
+										<option value="Raspberry ripple">Raspberry ripple</option>
+									<!-- {/each} -->
 								</select>
 
 								<div

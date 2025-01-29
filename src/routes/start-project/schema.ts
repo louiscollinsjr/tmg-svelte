@@ -7,7 +7,7 @@ export const projectTypes = ['Cookies and cream', 'Mint choc chip', 'Raspberry r
 export const combinedSchema = z.object({
     // Project Details
     description: z.string().min(1).default(""),
-    projectTypes: z.enum(projectTypes),
+    projectTypes: z.enum(['Cookies and cream', 'Mint choc chip', 'Raspberry ripple']).optional(),
     
     // Image Upload
     images: z.array(z.instanceof(File)).optional(),

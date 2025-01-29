@@ -3,6 +3,7 @@ import { authHandler } from '$lib/server/auth';
 import type { Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { i18n } from '$lib/i18n';
+import { handleFormSession } from '$lib/server/formSession';
 
 const handleParaglide: Handle = i18n.handle();
 
@@ -19,6 +20,11 @@ const handleSession: Handle = async ({ event, resolve }) => {
     const session = await event.locals.auth();
     event.locals.session = session;
     return await resolve(event);
+};
+
+// New handler for form session
+const handleFormData: Handle = async ({ event, resolve }) => {
+    return handleFormSession({ event, resolve });
 };
 
 const handleLogging: Handle = async ({ event, resolve }) => {
@@ -38,4 +44,4 @@ const handleLogging: Handle = async ({ event, resolve }) => {
     }
 };
 
-export const handle = sequence(handleLogging, handleParaglide, handleAuth, handleSession);
+export const handle = sequence(handleLogging, handleParaglide, handleAuth, handleSession, handleFormData);
