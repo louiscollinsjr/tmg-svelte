@@ -17,6 +17,39 @@
 	$: isLastStep = step === totalSteps;
 	$: isFirstStep = step === 1;
 
+	let budgetValue: number | undefined = undefined;
+	let budgetDisplay = '';
+
+	$: if (form) {
+		console.log('form changed:', $form);
+		budgetValue = $form.budget;
+		console.log('budgetValue:', budgetValue);
+	}
+
+	function formatBudget(value?: number) {
+		if (value === undefined) return '';
+		return new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency: 'USD',
+			minimumFractionDigits: 0
+		}).format(value);
+	}
+
+	$: budgetDisplay = formatBudget(budgetValue);
+
+	function handleBudgetInput(event: Event) {
+		const input = event.target as HTMLInputElement;
+		let numericValue = parseInt(input.value.replace(/[^0-9]/g, ''));
+
+		if (!isNaN(numericValue)) {
+			budgetValue = numericValue;
+		} else {
+			budgetValue = undefined; // Reset if input is not a valid number
+		}
+
+		form.update((f) => ({ ...f, budget: budgetValue }));
+	}
+
 	function nextStep() {
 		if (step < totalSteps) {
 			step = step + 1;
@@ -38,7 +71,7 @@
 		options
 	} = superForm(data.form, {
 		dataType: 'json',
-		async onSubmit({ form, cancel }) {
+		async onSubmit({ cancel, submitter }) {
 			console.log('onSubmit triggered');
 
 			// Validate current step
@@ -60,18 +93,14 @@
 				// Last step: Allow default submission
 				console.log('Last step, submitting form');
 				// Submission will be handled by SvelteKit since not cancelled
-			}
-		},
-
-		async onUpdated({ form }) {
-			if (form.valid) {
-				console.log('Form updated and valid, resetting step to 1');
-				step = 1;
+				if (submitter?.hasAttribute('data-submit-form')) {
+					return; // Let the form be submitted normally
+				}
 			}
 		}
 	});
 
-	const files = filesProxy(form, 'images');
+	const files = filesProxy(form, 'images'); // Create the files proxy
 </script>
 
 <div class="mx-auto min-h-screen bg-gray-50 py-12 pt-64">
@@ -108,7 +137,7 @@
 				method="POST"
 				enctype="multipart/form-data"
 				use:enhance
-				action={isLastStep ? "?/default" : ""}
+				action={isLastStep ? '?/submitProject' : ''}
 			>
 				<!-- Navigation buttons -->
 				<div class="mt-8 flex justify-between">
@@ -276,36 +305,17 @@
 						</div>
 
 						<div class="max-w-sm">
-							<label for="budget-range" class="mb-2 block text-sm font-medium text-gray-700"
-								>Budget Range</label
+							<label for="budget" class="mb-2 block text-sm font-medium text-gray-700">Budget</label
 							>
 							<div class="relative">
-								<select
-									id="budget-range"
-									bind:value={$form.budget}
-									class="w-full appearance-none rounded-lg border border-gray-300 bg-[#f8f7f3] px-3 py-2 pr-10 focus:border-black focus:ring-black"
-									required
-								>
-									<option value="">Select a budget range</option>
-									<option value="0-5000">$0 - $5,000</option>
-									<option value="5000-15000">$5,000 - $15,000</option>
-									<option value="15000-30000">$15,000 - $30,000</option>
-									<option value="30000-50000">$30,000 - $50,000</option>
-									<option value="50000+">$50,000+</option>
-								</select>
-								<div
-									class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700"
-								>
-									<svg
-										class="h-4 w-4 fill-current"
-										xmlns="http://www.w3.org/2000/svg"
-										viewBox="0 0 20 20"
-									>
-										<path
-											d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-										/>
-									</svg>
-								</div>
+								<input
+									type="text"
+									id="budget"
+									value={budgetDisplay}
+									on:input={handleBudgetInput}
+									class="w-full rounded-lg border border-gray-300 bg-[#f8f7f3] px-3 py-2 focus:border-black focus:ring-black"
+									placeholder="$50,000"
+								/>
 							</div>
 						</div>
 
@@ -321,11 +331,11 @@
 									required
 								>
 									<option value="">When do you want to start?</option>
-									<option value="immediately">Right away</option>
-									<option value="1-2 weeks">Within 1-2 weeks</option>
-									<option value="1 month">Within 1 month</option>
-									<option value="2-3 months">2-3 months</option>
-									<option value="planning">Just planning</option>
+									<option value="0">Right away</option>
+									<option value="2">In 2 weeks</option>
+									<option value="1">In 1 month</option>
+									<option value="2">In 2 months</option>
+									<option value="6">Still planning</option>
 								</select>
 								<div
 									class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700"
@@ -399,8 +409,8 @@
 					<div class="flex items-center gap-6">
 						{#if !isLastStep}
 							<button
-								type="button"
-								on:click={nextStep}
+								type="submit"
+								on:click|preventDefault={nextStep}
 								class="flex items-center gap-2 rounded-3xl bg-[#ff6923] px-7 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#ff6923]/80"
 							>
 								Next
@@ -408,6 +418,7 @@
 						{:else}
 							<button
 								type="submit"
+								formaction="?/submitProject"
 								class="flex items-center gap-2 rounded-3xl bg-[#ff6923] px-7 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#ff6923]/80"
 							>
 								Submit
