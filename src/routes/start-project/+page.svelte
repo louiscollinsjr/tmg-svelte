@@ -1,35 +1,16 @@
+<!-- src/routes/start-project/+page.svelte -->
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { writable } from 'svelte/store';
 	import { superForm, filesProxy } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { FileArrowUp, CaretRight, Camera, KeyReturn, ArrowLeft, X } from 'phosphor-svelte';
-	//import { combinedSchema } from './schema';
 	import { steps } from './schema';
-
-	// import {
-	// 	schemaWelcome,
-	// 	projectTypes,
-	// 	schemaProjectDetails,
-	// 	schemaImageUpload,
-	// 	schemaTimeBudget,
-	// 	schemaAboutYou
-	// } from './schema';
 
 	export let data;
 
-	// const steps = [
-	// 	zod(schemaWelcome),
-	// 	zod(schemaProjectDetails),
-	// 	zod(schemaImageUpload),
-	// 	zod(schemaTimeBudget),
-	// 	zod(schemaAboutYou)
-	// ];
-
 	let step = 1;
 	$: options.validators = zod(steps[step - 1]);
-
-	//let currentStep = writable(step);
 
 	let totalSteps = steps.length;
 	$: isLastStep = step === totalSteps;
@@ -46,22 +27,14 @@
 			step = step - 1;
 		}
 	}
-	
 
 	const { form, errors, message, enhance, validateForm, options } = superForm(data.form, {
-		// No need for hidden fields with dataType: 'json'
 		dataType: 'json',
 		async onSubmit({ cancel }) {
-			//If on last step, make a normal request
 			if (step == totalSteps) return;
-			else cancel();
-			// 	if (!isLastStep) {
-			// 	nextStep();
-			// 	return;
-			// }
+            else cancel();
 
-			// Make a manual client-side validation, since we have cancelled
-			const result = await validateForm({ update: true });
+			const result = await validateForm();
 			if (result.valid) nextStep();
 		},
 
@@ -126,13 +99,13 @@
 				{#if step === 1}
 					<div class="max-w-3xl space-y-4">
 						<h2 class="font-sourceserif text-3xl font-normal text-gray-900">
-							Let&apos;s Find the <span
+							Let's Find the <span
 								class="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent"
 								>Perfect Professional</span
 							> for Your Project!
 						</h2>
 						<p class="text-sm text-gray-500">
-							We&apos;ll help you find the perfect professional for your home improvement project. <br
+							We'll help you find the perfect professional for your home improvement project. <br
 							/> This will take about 3 minutes.
 						</p>
 					</div>
@@ -161,12 +134,9 @@
 									required
 								>
 									<option value="">Select a project type</option>
-									<!-- {#each $form.projectTypes as projectType}
-										<option value={projectType}>{projectType}</option> -->
-										<option value="Cookies and cream">Cookies and cream</option>
-										<option value="Mint choc chip">Mint choc chip</option>
-										<option value="Raspberry ripple">Raspberry ripple</option>
-									<!-- {/each} -->
+									<option value="Cookies and cream">Cookies and cream</option>
+									<option value="Mint choc chip">Mint choc chip</option>
+									<option value="Raspberry ripple">Raspberry ripple</option>
 								</select>
 
 								<div
@@ -319,9 +289,9 @@
 								>
 									<option value="">When do you want to start?</option>
 									<option value="immediately">Right away</option>
-									<option value="1-2weeks">Within 1-2 weeks</option>
-									<option value="1month">Within 1 month</option>
-									<option value="2-3months">2-3 months</option>
+									<option value="1-2 weeks">Within 1-2 weeks</option>
+									<option value="1 month">Within 1 month</option>
+									<option value="2-3 months">2-3 months</option>
 									<option value="planning">Just planning</option>
 								</select>
 								<div
@@ -349,7 +319,7 @@
 							<h2 class="font-roboto text-2xl font-normal text-gray-900">A little about you</h2>
 							<p class="text-sm text-gray-500">
 								For security purposes, we only collect your name, city, and state at this stage.
-								Once you begin working with a tradesperson, we&apos;ll gather additional information
+								Once you begin working with a tradesperson, we'll gather additional information
 								to ensure a smooth and secure process.
 							</p>
 						</div>

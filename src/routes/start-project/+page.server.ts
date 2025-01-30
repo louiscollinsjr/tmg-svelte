@@ -8,11 +8,12 @@ import { connectDB } from '$lib/server/db';
 import { getProjectModel } from '$lib/server/models/project';
 import { getUserModel } from '$lib/server/models/user';
 import mongoose from 'mongoose';
+import type { ProjectFormData } from '$lib/types/project'; // Optional, but improves clarity
 
 export const load: PageServerLoad = async ({ locals, url }) => {
     const session = await locals.auth();
     const form = await superValidate(zod(combinedSchema));
-    
+
     // Check for existing form data in session
     const savedFormData = await locals.formSession.get();
     if (savedFormData) {
@@ -21,8 +22,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
     // Check if the user was redirected from signin with the 'ref' query parameter
     const redirectedFromSignIn = url.searchParams.get('ref') === 'start-project';
-    
-    return { 
+
+    return {
         form,
         session,
         redirectedFromSignIn
@@ -49,10 +50,10 @@ export const actions: Actions = {
 
             // Save project to database
             await saveProject(form.data, session.user);
-            
+
             // Clear form session
             await locals.formSession.clear();
-            
+
             // Redirect to success page
             throw redirect(303, '/project/success');
         } catch (e) {
@@ -62,7 +63,7 @@ export const actions: Actions = {
     }
 };
 
-async function saveProject(formData: any, user: any) {
+async function saveProject(formData: ProjectFormData, user: any) {
     await connectDB();
     const Project = getProjectModel();
     const User = getUserModel();
