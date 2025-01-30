@@ -1,12 +1,11 @@
-<!-- src/routes/start-project/+page.svelte -->
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { writable } from 'svelte/store';
-	import { superForm, filesProxy } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import { FileArrowUp, CaretRight, Camera, KeyReturn, ArrowLeft, X } from 'phosphor-svelte';
-	import { steps } from './schema';
-	import { enhance } from '$app/forms';
+    import { page } from '$app/stores';
+    import { writable } from 'svelte/store';
+    import { superForm, filesProxy } from 'sveltekit-superforms';
+    import { zod } from 'sveltekit-superforms/adapters';
+    import { FileArrowUp, CaretRight, Camera, KeyReturn, ArrowLeft, X } from 'phosphor-svelte';
+    import { steps } from './schema';
+    //import { enhance } from '$app/forms'; <----- REMOVE THIS LINE (No need to import enhance)
 
 	export let data;
 
@@ -16,6 +15,59 @@
 	let totalSteps = steps.length;
 	$: isLastStep = step === totalSteps;
 	$: isFirstStep = step === 1;
+
+	function nextStep() {
+		if (step < totalSteps) {
+			if (step === 4) {
+                // Assuming step 4 is where timeline is selected
+                // Prepare the timeline object before moving to the next step
+                updateTimelineObject();
+            }
+			step = step + 1;
+		}
+	}
+
+	function updateTimelineObject() {
+        console.log("timeline is: ", $form.timeline)
+        if ($form.timeline) {
+            let startDate = new Date();
+            switch ($form.timeline) {
+                case '0w':
+                    startDate = new Date();
+                    break;
+                case '2w':
+                    startDate.setDate(startDate.getDate() + 14);
+                    break;
+                case '1m':
+                    startDate.setMonth(startDate.getMonth() + 1);
+                    break;
+                case '2m':
+                    startDate.setMonth(startDate.getMonth() + 2);
+                    break;
+                case '6m':
+                    startDate.setMonth(startDate.getMonth() + 6);
+                    break;
+                default:
+                    startDate.setDate(startDate.getDate() + 14); // Add 14 days (2 week)
+                    break;
+            }
+
+            form.update(f => ({
+                ...f,
+                timeline: {
+                    startDate: startDate,
+                    endDate: undefined, // Or a calculated value based on startDate
+                    completedDate: undefined
+                }
+            }));
+        }
+    }
+
+	function prevStep() {
+		if (step > 1) {
+			step = step - 1;
+		}
+	}
 
 	let budgetValue: number | undefined = undefined;
 	let budgetDisplay = '';
@@ -50,31 +102,12 @@
 		form.update((f) => ({ ...f, budget: budgetValue }));
 	}
 
-	function nextStep() {
-		if (step < totalSteps) {
-			step = step + 1;
-		}
-	}
-
-	function prevStep() {
-		if (step > 1) {
-			step = step - 1;
-		}
-	}
-
-	const {
-		form,
-		errors,
-		message,
-		enhance: enhanceFromSuperform,
-		validateForm,
-		options
-	} = superForm(data.form, {
+	const { form, errors, message, enhance, validateForm, options } = superForm(data.form, {
 		dataType: 'json',
 		async onSubmit({ cancel, submitter }) {
 			console.log('onSubmit triggered');
 
-			// Validate current step
+			// Validate the current step
 			const result = await validateForm();
 			console.log('Validation result:', result);
 
@@ -85,17 +118,22 @@
 			}
 
 			if (step < totalSteps) {
-				// Prevent default submission and proceed to next step
+				// Proceed to the next step for intermediate steps
 				console.log('Form is valid, calling nextStep()');
 				nextStep();
 				cancel();
 			} else {
-				// Last step: Allow default submission
+				// Allow form submission on the last step
 				console.log('Last step, submitting form');
-				// Submission will be handled by SvelteKit since not cancelled
-				if (submitter?.hasAttribute('data-submit-form')) {
-					return; // Let the form be submitted normally
+				if (!submitter || !submitter.hasAttribute('data-submit-form')) {
+					cancel();
 				}
+			}
+		},
+		async onUpdated({ form }) {
+			if (form.valid) {
+				console.log('Form updated and valid, resetting step to 1');
+				step = 1;
 			}
 		}
 	});
@@ -107,30 +145,7 @@
 	<div
 		class="relative mx-auto flex min-h-[600px] max-w-5xl flex-col overflow-hidden rounded-xl bg-[#f8f7f3] pb-24 shadow-xl"
 	>
-		<div class="flex items-center justify-between px-8 pt-8">
-			<div class="flex items-center gap-x-3 space-x-2">
-				<p class="text-sm font-bold text-gray-900">trymyguys.</p>
-				<p class="text-xs font-normal text-gray-600">Start a Project</p>
-			</div>
-			<button
-				class="absolute right-8 top-8 text-gray-400 transition-colors hover:text-gray-600"
-				on:click={() => window.history.back()}
-			>
-				<div class="flex items-center space-x-2 text-xs">
-					<span>Close</span>
-					<X weight="bold" class="h-3 w-3" />
-				</div>
-			</button>
-		</div>
-
-		<!-- Progress bar -->
-		<div class="absolute left-0 top-0 h-0.5 w-full">
-			<div
-				class="h-full rounded-tl-xl bg-[#ff6923] transition-all duration-300 ease-in-out"
-				style="width: {((step - 1) / totalSteps) * 100}%"
-				class:rounded-tr-xl={step === totalSteps}
-			></div>
-		</div>
+		<!-- ... header and progress bar ... -->
 
 		<div class="flex flex-1 items-center justify-center">
 			<form
@@ -359,7 +374,7 @@
 				{#if step === 5}
 					<div class="mx-auto max-w-3xl space-y-6">
 						<div class="space-y-4">
-							<h2 class="font-roboto text-2xl font-normal text-gray-900">A little about you</h2>
+							<h2 class="font-roboto text-2xl font-normal text-gray-900">Location information</h2>
 							<p class="text-sm text-gray-500">
 								For security purposes, we only collect your name, city, and state at this stage.
 								Once you begin working with a tradesperson, we'll gather additional information to
@@ -370,9 +385,9 @@
 						<div class="max-w-sm">
 							<label for="name" class="mb-2 block text-sm font-medium text-gray-700">Name</label>
 							<input
-								id="name"
+								id="zipcode"
 								type="text"
-								bind:value={$form.name}
+								bind:value={$form.zipcode}
 								class="w-full rounded-lg border border-gray-300 bg-[#f8f7f3] px-3 py-2 focus:border-black focus:ring-black"
 								required
 							/>
@@ -409,20 +424,21 @@
 					<div class="flex items-center gap-6">
 						{#if !isLastStep}
 							<button
-								type="submit"
-								on:click|preventDefault={nextStep}
+								type="button"
+								on:click={nextStep}
 								class="flex items-center gap-2 rounded-3xl bg-[#ff6923] px-7 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#ff6923]/80"
 							>
 								Next
 							</button>
 						{:else}
-							<button
-								type="submit"
-								formaction="?/submitProject"
-								class="flex items-center gap-2 rounded-3xl bg-[#ff6923] px-7 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#ff6923]/80"
-							>
-								Submit
-							</button>
+						<button
+						type="submit"
+						formaction="?/submitProject"
+						data-submit-form
+						class="flex items-center gap-2 rounded-3xl bg-[#ff6923] px-7 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#ff6923]/80"
+					>
+						Submit
+					</button>
 						{/if}
 						<p class="flex items-center gap-1 text-xs font-extralight text-gray-600">
 							<KeyReturn weight="fill" class="h-4 w-4 text-gray-300" /> or Press Enter

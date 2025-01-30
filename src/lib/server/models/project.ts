@@ -37,6 +37,9 @@ const projectSchema = new Schema({
         completedDate: Date
     },
     images: [imageSchema],
+    city: String,
+    state: String,
+    zipcode: String,
     createdAt: {
         type: Date,
         default: Date.now
@@ -56,14 +59,17 @@ export interface ProjectDocument extends mongoose.Document {
     budget: number;
     timeline?: {
         startDate?: Date;
-        endDate?: Date;
-        completedDate?: Date;
+        endDate: { type: Date, default: undefined },
+        completedDate: { type: Date, default: undefined }
     };
     images: Array<{
         url: string;
         caption?: string;
         _id: mongoose.Types.ObjectId;
     }>;
+    city?: string;
+    state?: string;
+    zipcode?: string;
     createdAt: Date;
     updatedAt: Date;
 }
