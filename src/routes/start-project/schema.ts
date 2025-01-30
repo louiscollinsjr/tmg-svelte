@@ -47,7 +47,8 @@ export const steps = [
     // Step 5: About You
     combinedSchema.pick({ 
         name: true, 
-        
+        city: true, 
+        state: true 
     })
 ] as const;
 
