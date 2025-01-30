@@ -6,6 +6,7 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { FileArrowUp, CaretRight, Camera, KeyReturn, ArrowLeft, X } from 'phosphor-svelte';
 	import { steps } from './schema';
+	import { enhance } from '$app/forms';
 
 	export let data;
 
@@ -28,18 +29,45 @@
 		}
 	}
 
-	const { form, errors, message, enhance, validateForm, options } = superForm(data.form, {
+	const {
+		form,
+		errors,
+		message,
+		enhance: enhanceFromSuperform,
+		validateForm,
+		options
+	} = superForm(data.form, {
 		dataType: 'json',
-		async onSubmit({ cancel }) {
-			if (step == totalSteps) return;
-            else cancel();
+		async onSubmit({ form, cancel }) {
+			console.log('onSubmit triggered');
 
+			// Validate current step
 			const result = await validateForm();
-			if (result.valid) nextStep();
+			console.log('Validation result:', result);
+
+			if (!result.valid) {
+				console.log('Form is invalid');
+				cancel();
+				return;
+			}
+
+			if (step < totalSteps) {
+				// Prevent default submission and proceed to next step
+				console.log('Form is valid, calling nextStep()');
+				nextStep();
+				cancel();
+			} else {
+				// Last step: Allow default submission
+				console.log('Last step, submitting form');
+				// Submission will be handled by SvelteKit since not cancelled
+			}
 		},
 
 		async onUpdated({ form }) {
-			if (form.valid) step = 1;
+			if (form.valid) {
+				console.log('Form updated and valid, resetting step to 1');
+				step = 1;
+			}
 		}
 	});
 
@@ -76,7 +104,12 @@
 		</div>
 
 		<div class="flex flex-1 items-center justify-center">
-			<form method="POST" enctype="multipart/form-data" use:enhance>
+			<form
+				method="POST"
+				enctype="multipart/form-data"
+				use:enhance
+				action={isLastStep ? "?/default" : ""}
+			>
 				<!-- Navigation buttons -->
 				<div class="mt-8 flex justify-between">
 					{#if !isFirstStep}
@@ -105,8 +138,8 @@
 							> for Your Project!
 						</h2>
 						<p class="text-sm text-gray-500">
-							We'll help you find the perfect professional for your home improvement project. <br
-							/> This will take about 3 minutes.
+							We'll help you find the perfect professional for your home improvement project. <br />
+							This will take about 3 minutes.
 						</p>
 					</div>
 				{/if}
@@ -319,8 +352,8 @@
 							<h2 class="font-roboto text-2xl font-normal text-gray-900">A little about you</h2>
 							<p class="text-sm text-gray-500">
 								For security purposes, we only collect your name, city, and state at this stage.
-								Once you begin working with a tradesperson, we'll gather additional information
-								to ensure a smooth and secure process.
+								Once you begin working with a tradesperson, we'll gather additional information to
+								ensure a smooth and secure process.
 							</p>
 						</div>
 
@@ -364,12 +397,22 @@
 				<!-- Navigation buttons -->
 				<div class="mt-8 flex justify-between">
 					<div class="flex items-center gap-6">
-						<button
-							type="submit"
-							class="flex items-center gap-2 rounded-3xl bg-[#ff6923] px-7 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#ff6923]/80"
-						>
-							{step == totalSteps ? 'Submit' : 'Next'}
-						</button>
+						{#if !isLastStep}
+							<button
+								type="button"
+								on:click={nextStep}
+								class="flex items-center gap-2 rounded-3xl bg-[#ff6923] px-7 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#ff6923]/80"
+							>
+								Next
+							</button>
+						{:else}
+							<button
+								type="submit"
+								class="flex items-center gap-2 rounded-3xl bg-[#ff6923] px-7 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#ff6923]/80"
+							>
+								Submit
+							</button>
+						{/if}
 						<p class="flex items-center gap-1 text-xs font-extralight text-gray-600">
 							<KeyReturn weight="fill" class="h-4 w-4 text-gray-300" /> or Press Enter
 						</p>

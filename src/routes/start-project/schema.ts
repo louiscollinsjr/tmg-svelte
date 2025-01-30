@@ -13,9 +13,9 @@ export const combinedSchema = z.object({
     images: z.array(z.instanceof(File)).optional(),
     
     // Budget and Timeline
-    budget: z.enum(['0-5000', '5000-10000', '10000-15000', '15000-20000', '20000+']).optional(),
+    budget: z.enum(['0-5000', '5000-15000', '15000-30000', '30000-50000', '50000+']).optional(),
     timeline: z.enum(['immediately', '1-2 weeks', '2-4 weeks', '4-6 weeks', '6-8 weeks', '8-12 weeks', '12+ weeks']).optional(),
-    
+   
     // About You
     name: z.string().min(1).optional(),
     city: z.string().min(1).optional(),

@@ -64,6 +64,7 @@ export const actions: Actions = {
 };
 
 async function saveProject(formData: ProjectFormData, user: any) {
+    console.log('saveProject called with data:', formData); // Log data
     await connectDB();
     const Project = getProjectModel();
     const User = getUserModel();
