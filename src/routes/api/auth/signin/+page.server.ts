@@ -18,7 +18,7 @@ export const load: PageServerLoad = async (event) => {
 export const actions: Actions = {
     default: async (event) => {
         console.log('[Server] 🔐 Processing sign-in request');
-
+        
         // Get the 'ref' query parameter
         const ref = event.url.searchParams.get('ref');
         const callbackUrl = ref ? `/auth/callback?ref=${ref}` : '/auth/callback';
