@@ -89,6 +89,10 @@ export const load: PageServerLoad = async ({ locals }) => {
                 { contractor: new mongoose.Types.ObjectId(userData._id) }
             ]
         })
+        .populate({
+            path: 'contractor',
+            select: 'name businessInfo.companyName image'
+        })
         .sort({ createdAt: -1 })
         .lean();
 

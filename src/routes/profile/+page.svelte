@@ -1,343 +1,301 @@
-<!-- src/routes/profile/+page.svelte -->
 <script lang="ts">
-    import { page } from '$app/stores';
-    $: data = $page.data;
-    $: console.log('Page data:', data);
+	import { page } from '$app/stores';
+	import { UserCircle, Archive, ThumbsUp, Star, ShareFat, Heart } from 'phosphor-svelte';
+    import { goto } from '$app/navigation';
 
-    function formatDate(dateStr: string) {
-        return new Date(dateStr).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-    }
+	$: data = $page.data;
+	$: console.log('Page data:', data);
+
+	function formatDate(dateStr: string) {
+		return new Date(dateStr).toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric'
+		});
+	}
 </script>
 
-{#if data.session?.user}
-    <div class="profile-container">
-        <section class="profile-header">
-            <img src={data.session.user.image} alt="Profile" width="100" />
-            <div class="profile-info">
-                <h1>{data.session.user.name}</h1>
-                <p class="email">{data.session.user.email}</p>
-            </div>
-        </section>
-        
-        {#if data.userData}
-            <section class="account-info">
-                <h2>Account Information</h2>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="label">Status:</span>
-                        <span class="value">{data.userData.status}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Member since:</span>
-                        <span class="value">{formatDate(data.userData.createdAt)}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Last active:</span>
-                        <span class="value">{formatDate(data.userData.lastActive)}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Pro member:</span>
-                        <span class="value">{data.userData.isPro ? 'Yes' : 'No'}</span>
-                    </div>
-                </div>
-            </section>
+<div class="min-h-screen bg-gray-50">
+	<div class="mx-auto max-w-[61.25rem] px-4 py-6 sm:px-6 lg:px-8">
+		{#if data.session?.user}
+			<div class="px-2 md:pt-32">
+				<div class="rounded-2xl p-1 shadow-sm">
+					<div class="flex items-center space-x-4">
+						<!-- User Profile Image and Info -->
+						<div class="relative pt-3">
+							<img
+								src={data.session.user.image}
+								alt={data.session.user.name}
+								class="h-16 w-16 rounded-full"
+							/>
+						</div>
+						<div>
+							<div class="mt-4">
+								<div class="flex items-center gap-2">
+									<h2 class="pr-4 text-3xl font-semibold">{data.session.user.name}</h2>
+									{#if data.userData.isPro}
+										<div
+											class="flex items-center gap-1 rounded-full bg-black px-4 py-1 text-xs font-bold text-white"
+										>
+											<span>TMG Verified Pro</span>
+											<div class="rounded-full bg-green-500 p-0.5">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													viewBox="0 0 24 24"
+													fill="currentColor"
+													aria-hidden="true"
+													data-slot="icon"
+													class="h-3 w-3 text-white"
+												>
+													<path
+														fill-rule="evenodd"
+														d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+														clip-rule="evenodd"
+													></path>
+												</svg>
+											</div>
+										</div>
+									{/if}
+								</div>
+								<p class="text-sm text-gray-600">{data.session.user.email}</p>
+							</div>
+						</div>
+					</div>
 
-            <section class="reviews">
-                <h2>Reviews</h2>
-                {#if data.reviews?.length}
-                    <div class="reviews-grid">
-                        {#each data.reviews as review}
-                            <div class="review-card">
-                                <div class="review-header">
-                                    <h3>{review.title}</h3>
-                                    <div class="rating">
-                                        {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                                    </div>
-                                </div>
-                                <p class="review-content">{review.content}</p>
-                                {#if review.projectDetails}
-                                    <div class="project-info">
-                                        <p class="project-title">Project: {review.projectDetails.title}</p>
-                                    </div>
-                                {/if}
-                                <div class="review-metadata">
-                                    <span class="date">{formatDate(review.createdAt)}</span>
-                                    <span class="helpful">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
-                                        </svg>
-                                        {review.helpful?.count || 0}
-                                    </span>
-                                </div>
-                                {#if review.images?.length}
-                                    <div class="review-images">
-                                        {#each review.images as image}
-                                            <img src={image.url} alt={image.caption || 'Review image'} />
-                                        {/each}
-                                    </div>
-                                {/if}
-                                {#if review.responses?.length}
-                                    <div class="responses">
-                                        {#each review.responses as response}
-                                            <div class="response">
-                                                <p>{response.content}</p>
-                                                <div class="response-meta">
-                                                    <span class="response-type">{response.isContractor ? 'Contractor' : 'Owner'}</span>
-                                                    <span class="response-date">{formatDate(response.timestamp)}</span>
-                                                </div>
-                                            </div>
-                                        {/each}
-                                    </div>
-                                {/if}
-                            </div>
-                        {/each}
-                    </div>
-                {:else}
-                    <p class="no-reviews">No reviews found.</p>
-                {/if}
-            </section>
+					<!-- User Stats -->
+					<div class="mt-6 grid grid-cols-3 gap-4 p-4 text-xs md:w-[35%]">
+						<div class="text-left">
+							<div class="text-gray-600">Projects</div>
+							<div class="text-lg font-bold">{data.projects?.length || 0}</div>
+						</div>
+						<div class="text-left">
+							<div class="text-gray-600">Reviews</div>
+							<div class="text-lg font-bold">{data.reviews?.length || 0}</div>
+						</div>
+						<div class="text-left">
+							<div class="text-gray-600">Rating</div>
+							<div class="justify-left flex text-base">
+								<div class="pt-1">
+									<div class="flex">
+										{#if data.reviews?.length}
+											{#each Array(Math.floor(data.reviews.reduce((sum, review) => sum + review.rating, 0) / data.reviews.length)) as _}
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													viewBox="0 0 24 24"
+													fill="currentColor"
+													aria-hidden="true"
+													data-slot="icon"
+													class="text-black-400 h-4 w-4"
+												>
+													<path
+														fill-rule="evenodd"
+														d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"
+														clip-rule="evenodd"
+													></path>
+												</svg>
+											{/each}
+											{#each Array(5 - Math.floor(data.reviews.reduce((sum, review) => sum + review.rating, 0) / data.reviews.length)) as _}
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													viewBox="0 0 24 24"
+													fill="currentColor"
+													aria-hidden="true"
+													data-slot="icon"
+													class="text-black-400 h-4 w-4 opacity-50"
+												>
+													<path
+														fill-rule="evenodd"
+														d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z"
+														clip-rule="evenodd"
+													></path>
+												</svg>
+											{/each}
+										{/if}
+									</div>
+								</div>
+								{#if data.reviews?.length}
+									<span class="ml-2 text-base font-semibold"
+										>{(
+											data.reviews.reduce((sum, review) => sum + review.rating, 0) /
+											data.reviews.length
+										).toFixed(2)}</span
+									>
+								{/if}
+							</div>
+						</div>
+					</div>
+				</div>
 
-            <section class="projects">
-                <h2>Projects</h2>
-                {#if data.projects?.length}
-                    <div class="projects-grid">
-                        {#each data.projects as project}
-                            <div class="project-card">
-                                <h3>{project.title}</h3>
-                                <p class="description">{project.description}</p>
-                                <div class="project-details">
-                                    <span class="status">Status: {project.status}</span>
-                                    <span class="location">Location: {project.metadata.location}</span>
-                                    <span class="budget">Budget: ${project.metadata.budget.toLocaleString()}</span>
-                                    <span class="timeline">Timeline: {project.metadata.timeline}</span>
-                                </div>
-                            </div>
-                        {/each}
+				<!-- My Projects Section -->
+				<div class="my-8">
+                    <div class="mb-8 flex items-center gap-4">
+                        <h3 class="text-2xl font-semibold">My Projects</h3>
+                        <button 
+                        on:click={() => goto('/start-project')}
+                        role="menuitem"
+                        class="rounded-lg bg-[#000000] px-4 py-2 text-[10px] font-semibold text-[#ffffff] tracking-wider">Start a New Project</button>
                     </div>
-                {:else}
-                    <p class="no-projects">No projects found.</p>
-                {/if}
-            </section>
-        {/if}
-    </div>
-{:else}
-    <p class="sign-in-message">Please sign in to view your profile.</p>
-{/if}
+					<div class="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-2">
+						{#if data.projects?.length}
+							{#each data.projects as project}
+								<div class="relative rounded-lg bg-[#f2f3EE] p-6 transition-shadow hover:shadow-md">
+									<!-- Archive Button -->
+									<button
+										class="absolute right-3 top-3 rounded-full p-1.5 transition-colors hover:bg-gray-100"
+										title="Archive project"
+									>
+										<Archive size={20} weight="duotone" />
+									</button>
+									<!-- Project Details -->
+									<div class="mb-4 flex items-start justify-between text-[#64635f]">
+										<div>
+											<h3 class="mb-2 text-sm font-semibold">{project.title}</h3>
+											<p class="mb-3 line-clamp-2 text-xs text-[#64635f]">{project.description}</p>
+										</div>
+									</div>
+									<div class="flex items-center justify-between text-sm">
+										<div class="flex items-center gap-3">
+											<span class="rounded-full py-1 text-xs font-medium capitalize text-[#64635f]"
+												>{project.status}</span
+											>
+											<span class="text-xs text-[#64635f]">{formatDate(project.createdAt)}</span>
+										</div>
+									</div>
+                                    <!-- Helpful Count -->
+										<div class="mt-auto flex items-center justify-between pt-3 text-xs">
+											<div class="flex items-center gap-2">
+												<span class="text-gray-400"
+													>0 people found this helpful</span
+												>
+											</div>
+										</div>
+										<div class="flex-col-3 flex items-center gap-3 pt-2 text-xs text-gray-400">
+											<button class="flex items-center gap-1">
+												<ThumbsUp size={13} weight="duotone" />
+												<span class="text-[11px] text-gray-400">Helpful</span>
+											</button>
+											|
+											<button class="text-[11px] text-gray-400">Report</button> |
+                                            <button class="text-[11px] text-gray-400 cursor-pointer" on:click={() => {}}>Write a review</button>
+										</div>
+								</div>
+							{/each}
+						{:else}
+							<p class="p-4 text-center text-gray-600">No projects found.</p>
+						{/if}
+					</div>
+				</div>
+
+				<!-- My Reviews Section -->
+				<div class="mt-12">
+					<h3 class="mb-8 text-2xl font-semibold">My Reviews</h3>
+					<div class="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-2">
+						{#if data.reviews?.length}
+							{#each data.reviews as review}
+								<div class="rounded-lg bg-[#f2f3EE] p-6 transition-shadow hover:shadow-md">
+									<div class="flex flex-col text-[#64635f]">
+										<!-- Reviewer Info -->
+										<div class="mb-2 flex items-start gap-2">
+											<UserCircle size={20} weight="duotone" class="mt-1" />
+											<div class="flex flex-col">
+												<span class="text-sm font-bold">{review.contractor.name}</span>
+												{#if review.contractor.businessInfo?.companyName}
+													<span class="text-xs text-gray-500"
+														>{review.contractor.businessInfo.companyName}</span
+													>
+												{/if}
+											</div>
+										</div>
+										<!-- Rating and Review Summary -->
+										<div class="mb-1 flex items-center justify-between">
+											<div class="flex items-center gap-2">
+												<div class="flex">
+													{#each Array(5) as _, i}
+														{#if (review.rating || 0) >= i + 1}
+															<!-- Full star -->
+															<svg
+																class="h-3 w-3 text-gray-600"
+																fill="currentColor"
+																viewBox="0 0 20 20"
+															>
+																<path
+																	d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+																/>
+															</svg>
+														{:else if (review.rating || 0) > i && (review.rating || 0) < i + 1}
+															<!-- Half star -->
+															<svg
+																class="h-3 w-3 text-gray-600"
+																fill="currentColor"
+																viewBox="0 0 20 20"
+															>
+																<defs>
+																	<linearGradient id="half-fill" x1="0" x2="100%" y1="0" y2="0">
+																		<stop offset="50%" stop-color="currentColor" />
+																		<stop offset="50%" stop-color="#D1D5DB" />
+																	</linearGradient>
+																</defs>
+																<path
+																	fill="url(#half-fill)"
+																	d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+																/>
+															</svg>
+														{:else}
+															<!-- Empty star -->
+															<svg
+																class="h-3 w-3 text-gray-300"
+																fill="currentColor"
+																viewBox="0 0 20 20"
+															>
+																<path
+																	d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+																/>
+															</svg>
+														{/if}
+													{/each}
+												</div>
+												<span class="text-xs text-gray-600">
+													{review.title}
+													<!-- {(review.rating || 0).toFixed(1)} {review.title} -->
+												</span>
+											</div>
+										</div>
+										<!-- Review Date and Content -->
+										<p class="mb-3 line-clamp-3 text-xs text-[#64635f]">
+											Reviewed on {formatDate(review.createdAt)}
+										</p>
+										<p class="mb-3 line-clamp-3 text-xs text-[#64635f]">{review.content}</p>
+										<!-- Helpful Count -->
+										<div class="mt-auto flex items-center justify-between pt-3 text-xs">
+											<div class="flex items-center gap-2">
+												<span class="text-gray-400"
+													>{review.helpful?.count || 0} people found this helpful</span
+												>
+											</div>
+										</div>
+										<div class="flex-col-3 flex items-center gap-3 pt-2 text-[11px] text-gray-400">
+											<button
+                                            title="Helpful">
+                                                <ThumbsUp size={13} />
+                                            </button>|<button
+                                            title="Report">
+                                                Report
+                                            </button>
+										</div>
+									</div>
+								</div>
+							{/each}
+						{:else}
+							<p class="p-4 text-center text-gray-600">No reviews found.</p>
+						{/if}
+					</div>
+				</div>
+			</div>
+		{:else}
+			<p class="p-4 text-center text-gray-600">Please sign in to view your profile.</p>
+		{/if}
+	</div>
+</div>
 
 <style>
-    .profile-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-
-    .profile-header {
-        display: flex;
-        align-items: center;
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .profile-header img {
-        border-radius: 50%;
-        border: 3px solid #fff;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .profile-info h1 {
-        margin: 0;
-        color: #2d3748;
-    }
-
-    .email {
-        color: #718096;
-        margin-top: 0.5rem;
-    }
-
-    section {
-        background: white;
-        border-radius: 8px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    h2 {
-        color: #2d3748;
-        margin-top: 0;
-        margin-bottom: 1.5rem;
-        font-size: 1.5rem;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-    }
-
-    .info-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .label {
-        color: #718096;
-        font-size: 0.875rem;
-    }
-
-    .value {
-        font-weight: 500;
-        color: #2d3748;
-    }
-
-    .reviews-grid, .projects-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .review-card {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 1.5rem;
-        transition: transform 0.2s;
-    }
-
-    .review-card:hover {
-        transform: translateY(-2px);
-    }
-
-    .review-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 1rem;
-    }
-
-    .review-header h3 {
-        margin: 0;
-        color: #2d3748;
-    }
-
-    .rating {
-        color: #ecc94b;
-        font-size: 1.25rem;
-    }
-
-    .review-content {
-        color: #4a5568;
-        margin-bottom: 1rem;
-        line-height: 1.6;
-    }
-
-    .project-info {
-        background: #f7fafc;
-        padding: 0.75rem;
-        border-radius: 6px;
-        margin-bottom: 1rem;
-    }
-
-    .project-title {
-        margin: 0;
-        font-weight: 500;
-        color: #2d3748;
-    }
-
-    .review-metadata {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        color: #718096;
-        font-size: 0.875rem;
-    }
-
-    .helpful {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .review-images {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    .review-images img {
-        width: 100%;
-        height: 150px;
-        object-fit: cover;
-        border-radius: 6px;
-    }
-
-    .responses {
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid #e2e8f0;
-    }
-
-    .response {
-        background: #f7fafc;
-        padding: 1rem;
-        border-radius: 6px;
-        margin-top: 1rem;
-    }
-
-    .response p {
-        margin: 0;
-        color: #4a5568;
-    }
-
-    .response-meta {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 0.5rem;
-        font-size: 0.875rem;
-        color: #718096;
-    }
-
-    .project-card {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 1.5rem;
-        transition: transform 0.2s;
-    }
-
-    .project-card:hover {
-        transform: translateY(-2px);
-    }
-
-    .project-card h3 {
-        margin: 0 0 1rem 0;
-        color: #2d3748;
-    }
-
-    .description {
-        color: #4a5568;
-        margin-bottom: 1rem;
-        line-height: 1.6;
-    }
-
-    .project-details {
-        display: grid;
-        gap: 0.5rem;
-        color: #718096;
-        font-size: 0.875rem;
-    }
-
-    .no-reviews, .no-projects, .sign-in-message {
-        text-align: center;
-        color: #718096;
-        padding: 2rem;
-        background: #f7fafc;
-        border-radius: 8px;
-    }
 </style>
