@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { UserCircle, Archive, ThumbsUp, Star, ShareFat, Heart } from 'phosphor-svelte';
     import { goto } from '$app/navigation';
+    import BackgroundPattern from '../components/BackgroundPattern.svelte';
 
 	$: data = $page.data;
 	// $: console.log('Page data:', data);
@@ -16,10 +17,11 @@
 </script>
 
 <div class="min-h-screen bg-gray-50">
-	<div class="mx-auto max-w-[61.25rem] px-4 py-6 sm:px-6 lg:px-8">
+    <BackgroundPattern opacity="0.05" patternClassName="bg-gray-50" />
+	<div class="relative z-10 mx-auto max-w-[61.25rem] px-4 py-6 sm:px-6 lg:px-8">
 		{#if data.session?.user}
 			<div class="px-2 md:pt-32">
-				<div class="rounded-2xl p-1 shadow-sm">
+				<div class="rounded-2xl p-1 shadow-none">
 					<div class="flex items-center space-x-4">
 						<!-- User Profile Image and Info -->
 						<div class="relative pt-3">

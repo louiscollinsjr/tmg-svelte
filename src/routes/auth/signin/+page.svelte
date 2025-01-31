@@ -87,7 +87,7 @@
                 </p>
 
                 <p class="text-center text-xs text-gray-500 mt-4">
-                    Secured by <span class="text-gray-900 font-bold"> clerk</span>
+                    Secured by <span class="text-gray-900 font-bold"> tmg.</span>
                   </p>
         </div>
     </div>

@@ -2,6 +2,7 @@
 <script>
     import { onMount } from 'svelte';
     import { goto } from '$app/navigation';
+    import BackgroundPattern from '../../components/BackgroundPattern.svelte';
 
     onMount(() => {
         // Redirect to the profile page after a short delay
@@ -16,6 +17,7 @@
 
   
   <div class="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+    <BackgroundPattern opacity="0.05" patternClassName="bg-gray-50" />
     <div class="bg-[#f8f7f3] rounded-2xl max-w-xl w-full p-16 relative overflow-hidden shadow-lg">
       <div class="absolute inset-0">
         <div

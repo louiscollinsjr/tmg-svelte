@@ -1,4 +1,5 @@
 <script lang="ts">
+	import  BackgroundPattern from '../components/BackgroundPattern.svelte';
     import { page } from '$app/stores';
     import { goto } from '$app/navigation';
     import { writable } from 'svelte/store';
@@ -189,21 +190,23 @@
     });
 </script>
 
-<div class="mx-auto min-h-screen bg-gray-50 py-12 pt-64">
+<div class="mx-auto min-h-screen bg-gray-50 py-12 pt-72">
+	<BackgroundPattern opacity="0.05" patternClassName="bg-gray-100" />
 	<div
-		class="relative mx-auto flex min-h-[600px] max-w-5xl flex-col overflow-hidden rounded-xl bg-[#f8f7f3] pb-24 shadow-xl"
+		class="relative z-10 mx-auto flex min-h-[600px] max-w-5xl flex-col overflow-visible rounded-xl pb-24 shadow-xl ring-0 ring-gray-300 before:absolute before:-inset-4 before:blur-[25px] before:bg-gradient-to-br before:from-green-400/10 before:via-teal-600/10 before:to-orange-400/10 before:-z-50 after:absolute after:inset-0 after:bg-[#f8f7f3] after:-z-40 after:rounded-xl"
 	>
 		<!-- ... header and progress bar ... -->
 		 <!-- Progress bar -->
-		<div class="absolute left-0 top-0 h-0.5 w-full">
-			<div
-				class="h-full rounded-tl-xl bg-[#ff6923] transition-all duration-300 ease-in-out"
-				style="width: {((step - 1) / totalSteps) * 100}%"
-				class:rounded-tr-xl={step === totalSteps}
-			></div>
-		</div>
+		
 
 		<div class="flex flex-1 items-center justify-center">
+			<div class="absolute left-2 top-0 h-0.5 w-full">
+				<div
+					class="h-full rounded-tl-xl bg-gradient-to-r from-gray-100/10 via-[#ff6923]/30 to-[#ff6923]/50 transition-all duration-300 ease-in-out"
+					style="width: {((step - 1) / totalSteps) * 100}%"
+					class:rounded-tr-xl={step === totalSteps}
+				></div>
+			</div>
 			<form
 				method="POST"
 				enctype="multipart/form-data"
@@ -229,7 +232,7 @@
 				{/if}
 
 				<!-- Navigation buttons -->
-				<div class="mt-8 flex justify-between">
+				<div class="mt-8 py-8flex justify-between">
 					{#if !isFirstStep}
 						<button
 							type="button"
@@ -238,7 +241,7 @@
 						>
 							<div class="flex items-center gap-2 pb-8 text-xs">
 								<ArrowLeft class="h-4 w-4" />
-								<p>Back {step -1} of {totalSteps - 1 }</p>
+								<p>Back</p>
 							</div>
 						</button>
 					{:else}
@@ -249,7 +252,7 @@
 				<!-- Step 1: Welcome -->
 				{#if step === 1}
 					<div class="max-w-3xl space-y-4">
-						<h2 class="font-sourceserif text-3xl font-normal text-gray-900">
+						<h2 class="font-sourceserif text-5xl  font-normal text-gray-900">
 							Let's Find the <span
 								class="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent"
 								>Perfect Professional</span
@@ -265,7 +268,7 @@
 				<!-- Step 2: Project Details -->
 				{#if step === 2}
 					<div class="max-w-3xl space-y-6">
-						<h2 class="font-sourceserif text-3xl font-normal text-gray-900">
+						<h2 class="font-sourceserif text-5xl font-normal text-gray-900">
 							Tell us about your project
 						</h2>
 						<p class="text-sm text-gray-500">
@@ -331,7 +334,7 @@
 				{#if step === 3}
 					<div class="max-w-3xl space-y-6">
 						<div class="space-y-4">
-							<h2 class="font-sourceserif text-3xl font-normal text-gray-900">
+							<h2 class="font-sourceserif text-5xl font-normal text-gray-900">
 								Upload photos (optional)
 							</h2>
 							<p class="text-sm text-gray-500">
@@ -388,7 +391,7 @@
 				{#if step === 4}
 					<div class="mx-auto max-w-2xl space-y-6">
 						<div class="space-y-4">
-							<h2 class="font-roboto text-2xl font-normal text-gray-900">
+							<h2 class="font-roboto text-4xl font-normal text-gray-900">
 								Budget and Timeline (optional)
 							</h2>
 							<p class="text-sm text-gray-500">
@@ -413,7 +416,7 @@
 						</div>
 
 						<div class="max-w-sm">
-							<label for="timeline" class="mb-2 block text-sm font-medium text-gray-700"
+							<label for="timeline" class="mb-2 block text-sm font-medium text-gray-700 font-sourceserif"
 								>Timeline</label
 							>
 							<div class="relative">
@@ -452,7 +455,7 @@
 				{#if step === 5}
 					<div class="mx-auto max-w-3xl space-y-6">
 						<div class="space-y-4">
-							<h2 class="font-roboto text-2xl font-normal text-gray-900">Location information!</h2>
+							<h2 class="font-roboto text-5xl font-normal font-sourceserif text-gray-900">Location information!</h2>
 							<p class="text-sm text-gray-500">
 								For security purposes, we only collect your name, city, and state at this stage.
 								Once you begin working with a tradesperson, we'll gather additional information to
