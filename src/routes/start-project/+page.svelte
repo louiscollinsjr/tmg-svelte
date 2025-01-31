@@ -452,7 +452,7 @@
 				{#if step === 5}
 					<div class="mx-auto max-w-3xl space-y-6">
 						<div class="space-y-4">
-							<h2 class="font-roboto text-2xl font-normal text-gray-900">Location information</h2>
+							<h2 class="font-roboto text-2xl font-normal text-gray-900">Location information!</h2>
 							<p class="text-sm text-gray-500">
 								For security purposes, we only collect your name, city, and state at this stage.
 								Once you begin working with a tradesperson, we'll gather additional information to
@@ -461,7 +461,7 @@
 						</div>
 
 						<div class="max-w-sm">
-							<label for="name" class="mb-2 block text-sm font-medium text-gray-700">Name</label>
+							<label for="zipcode" class="mb-2 block text-sm font-medium text-gray-700">Zipcode</label>
 							<input
 								id="zipcode"
 								type="text"
