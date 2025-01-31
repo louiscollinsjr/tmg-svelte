@@ -7,6 +7,7 @@
     import { FileArrowUp, CaretRight, Camera, KeyReturn, ArrowLeft, X } from 'phosphor-svelte';
     import { steps } from './schema';
     import { browser } from '$app/environment';
+    import { onMount, onDestroy } from 'svelte';
 
 	export let data;
 
@@ -151,6 +152,30 @@
 	$: serverError = $errors?.server;
 
 	const files = filesProxy(form, 'images'); // Create the files proxy
+
+    // Add keyboard event listener for Enter key
+    function handleKeydown(event: KeyboardEvent) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            const submitButton = document.querySelector('[data-submit-form]');
+            const nextButton = document.querySelector('[data-next-step]');
+            
+            if (isLastStep && submitButton) {
+                (submitButton as HTMLButtonElement).click();
+            } else if (nextButton) {
+                (nextButton as HTMLButtonElement).click();
+            }
+        }
+    }
+
+    // Add and remove event listener on mount/unmount
+    onMount(() => {
+        document.addEventListener('keydown', handleKeydown);
+    });
+    
+    onDestroy(() => {
+        document.removeEventListener('keydown', handleKeydown);
+    });
 </script>
 
 <div class="mx-auto min-h-screen bg-gray-50 py-12 pt-64">
@@ -158,6 +183,14 @@
 		class="relative mx-auto flex min-h-[600px] max-w-5xl flex-col overflow-hidden rounded-xl bg-[#f8f7f3] pb-24 shadow-xl"
 	>
 		<!-- ... header and progress bar ... -->
+		 <!-- Progress bar -->
+		<div class="absolute left-0 top-0 h-0.5 w-full">
+			<div
+				class="h-full rounded-tl-xl bg-[#ff6923] transition-all duration-300 ease-in-out"
+				style="width: {((step - 1) / totalSteps) * 100}%"
+				class:rounded-tr-xl={step === totalSteps}
+			></div>
+		</div>
 
 		<div class="flex flex-1 items-center justify-center">
 			<form
@@ -194,7 +227,7 @@
 						>
 							<div class="flex items-center gap-2 pb-8 text-xs">
 								<ArrowLeft class="h-4 w-4" />
-								<p>Back {step} of {totalSteps}</p>
+								<p>Back {step -1} of {totalSteps - 1 }</p>
 							</div>
 						</button>
 					{:else}
@@ -455,6 +488,7 @@
 							<button
 								type="button"
 								on:click={nextStep}
+								data-next-step
 								class="flex items-center gap-2 rounded-3xl bg-[#ff6923] px-7 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#ff6923]/80"
 							>
 								Next
