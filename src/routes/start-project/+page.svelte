@@ -1,11 +1,12 @@
 <script lang="ts">
     import { page } from '$app/stores';
+    import { goto } from '$app/navigation';
     import { writable } from 'svelte/store';
     import { superForm, filesProxy } from 'sveltekit-superforms';
     import { zod } from 'sveltekit-superforms/adapters';
     import { FileArrowUp, CaretRight, Camera, KeyReturn, ArrowLeft, X } from 'phosphor-svelte';
     import { steps } from './schema';
-    //import { enhance } from '$app/forms'; <----- REMOVE THIS LINE (No need to import enhance)
+    import { browser } from '$app/environment';
 
 	export let data;
 
@@ -102,7 +103,7 @@
 		form.update((f) => ({ ...f, budget: budgetValue }));
 	}
 
-	const { form, errors, message, enhance, validateForm, options } = superForm(data.form, {
+	const { form, errors, message, enhance, validateForm, options, reset } = superForm(data.form, {
 		dataType: 'json',
 		async onSubmit({ cancel, submitter }) {
 			console.log('onSubmit triggered');
@@ -123,20 +124,31 @@
 				nextStep();
 				cancel();
 			} else {
-				// Allow form submission on the last step
+				// On the last step, allow form submission
 				console.log('Last step, submitting form');
-				if (!submitter || !submitter.hasAttribute('data-submit-form')) {
-					cancel();
-				}
 			}
 		},
-		async onUpdated({ form }) {
-			if (form.valid) {
-				console.log('Form updated and valid, resetting step to 1');
+		async onResult({ result }) {
+			console.log('Form submission result:', result);
+			// Only show errors for non-redirect failures
+			if (result.type === 'success') {
+				// Reset the form
+				reset();
 				step = 1;
+				// Navigate to success page on successful submission
+				if (browser) {
+					await goto('/project/success', { replaceState: true });
+				}
+			} else if (result.type === 'failure' && result.status !== 303) {
+				console.error('Form submission failed:', result.data?.form?.errors || result);
 			}
-		}
+		},
+		resetForm: true,
+		taintedMessage: null,
+		validators: zod(steps[step - 1])
 	});
+
+	$: serverError = $errors?.server;
 
 	const files = filesProxy(form, 'images'); // Create the files proxy
 </script>
@@ -154,6 +166,24 @@
 				use:enhance
 				action={isLastStep ? '?/submitProject' : ''}
 			>
+				{#if serverError}
+					<div class="mb-4 rounded-md bg-red-50 p-4">
+						<div class="flex">
+							<div class="flex-shrink-0">
+								<svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+									<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+								</svg>
+							</div>
+							<div class="ml-3">
+								<h3 class="text-sm font-medium text-red-800">Error</h3>
+								<div class="mt-2 text-sm text-red-700">
+									{serverError}
+								</div>
+							</div>
+						</div>
+					</div>
+				{/if}
+
 				<!-- Navigation buttons -->
 				<div class="mt-8 flex justify-between">
 					{#if !isFirstStep}
@@ -164,7 +194,7 @@
 						>
 							<div class="flex items-center gap-2 pb-8 text-xs">
 								<ArrowLeft class="h-4 w-4" />
-								<p>Back</p>
+								<p>Back {step} of {totalSteps}</p>
 							</div>
 						</button>
 					{:else}
@@ -320,8 +350,7 @@
 						</div>
 
 						<div class="max-w-sm">
-							<label for="budget" class="mb-2 block text-sm font-medium text-gray-700">Budget</label
-							>
+							<label for="budget" class="mb-2 block text-sm font-medium text-gray-700">Budget</label>
 							<div class="relative">
 								<input
 									type="text"

@@ -31,83 +31,109 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-    submitProject: async ({ request, locals }) => {
-        const session = await locals.auth();
-        const form = await superValidate(request, zod(combinedSchema));
+	submitProject: async ({ request, locals }) => {
+		const session = await locals.auth();
+		const form = await superValidate(request, zod(combinedSchema));
 
-        console.log('Received form data in submitProject:', form);
+		try {
+			console.log('Received form data in submitProject:', form);
 
-        if (!form.valid) {
-            console.error('Form validation failed on server:', form.errors);
-            return fail(400, { form });
-        }
+			if (!form.valid) {
+				console.error('Form validation failed on server:', form.errors);
+				return fail(400, { form }); // Return the invalid form
+			}
 
-        if (!session?.user) {
-            // Store form data in session
-            await locals.formSession.set(form.data);
+			if (!session?.user) {
+				// Store form data in session
+				await locals.formSession.set(form.data);
 
-            // Redirect to sign in with a 'ref' query parameter
-            throw redirect(303, '/auth/signin?ref=start-project');
-        }
+				// Return both form data and redirect
+				return {
+					form,
+					status: 303,
+					headers: { location: '/auth/signin?ref=start-project' }
+				};
+			}
 
-        try {
-            // Save project to database using form.data
-            await saveProject(form.data, session.user);
+			// Save project to database using form.data
+			const savedProject = await saveProject(form.data, session.user);
 
-            // Clear form session
-            await locals.formSession.clear();
+			// Clear form session
+			await locals.formSession.clear();
 
-             // Redirect to success page using a return statement
-             return {
-                status: 303,
-                headers: {
-                    location: '/project/success'
-                }
-            };
-        } catch (e) {
-            // Now only actual errors will be logged here
-            console.error('Error in submitProject:', e); 
-            return message(form, 'Failed to save project', { status: 500 });
-        }
-    }
+			// Return success
+			return { form, success: true };
+		} catch (e) {
+			console.error('Error in submitProject:', e);
+			// Return a more detailed error message to the client
+			return fail(500, {
+				form: {
+					...form,
+					errors: { server: e.message || 'Failed to save project' }
+				}
+			});
+		}
+	}
 };
 
 async function saveProject(formData: ProjectFormData, user: any) {
-    console.log('saveProject called with data:', formData); // Log data to check the budget value
-    await connectDB();
-    const Project = getProjectModel();
-    const User = getUserModel();
+	try {
+		console.log('saveProject called with data:', formData);
+		await connectDB();
+		const Project = getProjectModel();
+		const User = getUserModel();
 
-    // Find the user by ID or email
-    const userData = await User.findOne({
-        $or: [
-            { _id: new mongoose.Types.ObjectId(user.id) },
-            { email: user.email }
-        ]
-    }).lean();
+		// Find the user by ID or email
+		const userData = await User.findOne({
+			$or: [
+				{ _id: new mongoose.Types.ObjectId(user.id) },
+				{ email: user.email }
+			]
+		}).lean();
 
-    if (!userData) {
-        throw new Error('User not found');
-    }
+		if (!userData) {
+			throw new Error('User not found');
+		}
 
+		// Ensure budget is a number
+		const budget = typeof formData.budget === 'string' 
+			? parseFloat(formData.budget) 
+			: (formData.budget || 0);
 
-    // Create a new project using the form data and user ID
-    const project = new Project({
-        contractor: userData._id, // Assuming the user is the contractor
-        client: userData._id,     // Assuming the user is also the client
-        title: "New Project",    // Get this from the form data if available
-        description: formData.description,
-        status: 'pending',
-        budget: formData.budget, // Now a number
-        timeline: formData.timeline,
-        images: [],              // Handle image uploads later
-        city: formData.city,
-        state: formData.state,
-        zipcode: formData.zipcode,
-        createdAt: new Date(),
-        updatedAt: new Date()
-    });
+		if (isNaN(budget)) {
+			throw new Error('Invalid budget value');
+		}
 
-    // Save the project
-    await project.save();
+		// Create timeline with proper date objects
+		const timeline = {
+			startDate: formData.timeline?.startDate ? new Date(formData.timeline.startDate) : new Date(),
+			endDate: formData.timeline?.endDate ? new Date(formData.timeline.endDate) : undefined,
+			completedDate: formData.timeline?.completedDate ? new Date(formData.timeline.completedDate) : undefined
+		};
+
+		// Create a new project using the form data and user ID
+		const project = new Project({
+			contractor: userData._id,
+			client: userData._id,
+			title: formData.projectTypes || "New Project",
+			description: formData.description || '',
+			status: 'pending',
+			budget: budget,
+			timeline: timeline,
+			images: [], // Handle image uploads later
+			city: formData.city || '',
+			state: formData.state || '',
+			zipcode: formData.zipcode || '',
+			createdAt: new Date(),
+			updatedAt: new Date()
+		});
+
+		// Save the project
+		const savedProject = await project.save();
+		console.log('Project saved successfully:', savedProject);
+		return savedProject;
+	} catch (error) {
+		console.error('Error saving project:', error);
+		throw error; // Re-throw to be caught by the action handler
+	}
 }
