@@ -11,6 +11,8 @@
 
 	export let data;
 
+	const { categories } = data;
+
 	let step = 1;
 	$: options.validators = zod(steps[step - 1]);
 
@@ -169,12 +171,21 @@
     }
 
     // Add and remove event listener on mount/unmount
+    let cleanup: (() => void) | undefined;
+
     onMount(() => {
-        document.addEventListener('keydown', handleKeydown);
+        if (browser) {
+            document.addEventListener('keydown', handleKeydown);
+            cleanup = () => {
+                document.removeEventListener('keydown', handleKeydown);
+            };
+        }
     });
     
     onDestroy(() => {
-        document.removeEventListener('keydown', handleKeydown);
+        if (cleanup) {
+            cleanup();
+        }
     });
 </script>
 
@@ -262,9 +273,7 @@
 						</p>
 
 						<div>
-							<label for="project-type" class="mb-2 block text-sm font-medium text-gray-700"
-								>Project Type</label
-							>
+							<label for="project-type" class="mb-2 block text-sm font-medium text-gray-700">Project Type</label>
 							<div class="relative">
 								<select
 									name="projectTypes"
@@ -274,9 +283,11 @@
 									required
 								>
 									<option value="">Select a project type</option>
-									<option value="Cookies and cream">Cookies and cream</option>
-									<option value="Mint choc chip">Mint choc chip</option>
-									<option value="Raspberry ripple">Raspberry ripple</option>
+									{#each categories as category}
+										<option value={category.id}>
+											{category.name} {#if category.icon}<span class="text-gray-500">({category.icon})</span>{/if}
+										</option>
+									{/each}
 								</select>
 
 								<div
@@ -293,12 +304,17 @@
 									</svg>
 								</div>
 							</div>
+							{#if $form.projectTypes}
+								{#each categories as category}
+									{#if category.id === $form.projectTypes}
+										<p class="mt-1 text-sm text-gray-500">{category.description}</p>
+									{/if}
+								{/each}
+							{/if}
 						</div>
 
 						<div>
-							<label for="project-description" class="mb-2 block text-sm font-medium text-gray-700"
-								>Project Description</label
-							>
+							<label for="project-description" class="mb-2 block text-sm font-medium text-gray-700">Project Description</label>
 							<textarea
 								id="project-description"
 								bind:value={$form.description}

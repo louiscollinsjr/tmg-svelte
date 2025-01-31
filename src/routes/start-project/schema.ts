@@ -1,13 +1,11 @@
 // schema.ts
 import { z } from 'zod';
 
-export const projectTypes = ['Cookies and cream', 'Mint choc chip', 'Raspberry ripple'] as const;
-
 // Combined schema for the entire form
 export const combinedSchema = z.object({
     // Project Details
     description: z.string().optional().default(''),
-    projectTypes: z.enum(['Cookies and cream', 'Mint choc chip', 'Raspberry ripple']).optional(),
+    projectTypes: z.string().optional(),
 
     // Image Upload
     images: z.array(z.instanceof(File)).optional(),
@@ -21,7 +19,7 @@ export const combinedSchema = z.object({
     }).optional(),
 
     // About You
-   zipcode: z.string().optional().default(''),
+    zipcode: z.string().optional().default(''),
     city: z.string().optional().default(''),
     state: z.string().optional().default('')
 });

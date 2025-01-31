@@ -22,6 +22,11 @@ const projectSchema = new Schema({
         required: true
     },
     description: String,
+    category: {
+        type: String,
+        ref: 'ServiceCategory',
+        required: true
+    },
     status: {
         type: String,
         enum: ['pending', 'in_progress', 'completed', 'cancelled'],
@@ -50,17 +55,27 @@ const projectSchema = new Schema({
     }
 });
 
-export interface ProjectDocument extends mongoose.Document {
+let Project: Model<ProjectDocument>;
+
+export function getProjectModel(): Model<ProjectDocument> {
+    if (!Project) {
+        Project = mongoose.models.Project || mongoose.model<ProjectDocument>('Project', projectSchema);
+    }
+    return Project;
+}
+
+export interface ProjectDocument {
     contractor: mongoose.Types.ObjectId;
     client: mongoose.Types.ObjectId;
     title: string;
     description?: string;
+    category: string;
     status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
     budget: number;
     timeline?: {
         startDate?: Date;
-        endDate: { type: Date, default: undefined },
-        completedDate: { type: Date, default: undefined }
+        endDate?: Date;
+        completedDate?: Date;
     };
     images: Array<{
         url: string;
@@ -72,13 +87,4 @@ export interface ProjectDocument extends mongoose.Document {
     zipcode?: string;
     createdAt: Date;
     updatedAt: Date;
-}
-
-let Project: Model<ProjectDocument>;
-
-export function getProjectModel(): Model<ProjectDocument> {
-    if (!Project) {
-        Project = mongoose.models.Project || mongoose.model<ProjectDocument>('Project', projectSchema);
-    }
-    return Project;
 }
