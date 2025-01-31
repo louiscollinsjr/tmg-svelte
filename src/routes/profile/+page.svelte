@@ -4,7 +4,7 @@
     import { goto } from '$app/navigation';
 
 	$: data = $page.data;
-	$: console.log('Page data:', data);
+	// $: console.log('Page data:', data);
 
 	function formatDate(dateStr: string) {
 		return new Date(dateStr).toLocaleDateString('en-US', {
@@ -149,6 +149,7 @@
 									<!-- Project Details -->
 									<div class="mb-4 flex items-start justify-between text-[#64635f]">
 										<div>
+                                            <!-- pill for projec status red yellow green -->
 											<h3 class="mb-2 text-sm font-semibold">{project.title}</h3>
 											<p class="mb-3 line-clamp-2 text-xs text-[#64635f]">{project.description}</p>
 										</div>

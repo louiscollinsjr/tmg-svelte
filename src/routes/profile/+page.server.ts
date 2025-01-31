@@ -79,7 +79,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 
         // Fetch user's projects
         const projects = await Project.find({ 
-            owner: new mongoose.Types.ObjectId(userData._id) 
+            $or: [
+                { client: new mongoose.Types.ObjectId(userData._id) },
+                { owner: new mongoose.Types.ObjectId(userData._id) }
+            ]
         }).lean();
 
         // Fetch reviews where the user is either the owner or contractor

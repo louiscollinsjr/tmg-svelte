@@ -11,6 +11,16 @@ const reviewSchema = new Schema({
         ref: 'User',
         required: true
     },
+    owner: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    created_by: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     project: {
         type: Schema.Types.ObjectId,
         ref: 'Project'
@@ -41,6 +51,8 @@ const reviewSchema = new Schema({
 export interface ReviewDocument extends mongoose.Document {
     contractor: mongoose.Types.ObjectId;
     client: mongoose.Types.ObjectId;
+    created_by: mongoose.Types.ObjectId;
+	owner: mongoose.Types.ObjectId;
     project?: mongoose.Types.ObjectId;
     rating: number;
     title?: string;

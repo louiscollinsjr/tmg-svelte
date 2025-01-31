@@ -9,14 +9,15 @@
     import type { Session } from '@auth/core/types';
     import { signIn, signOut } from '@auth/sveltekit/client';
     import { onMount } from 'svelte';
-      
-    let isMenuOpen = false;
-    let isProfileOpen = false;
+    import { fade } from 'svelte/transition';
+    import { goto } from '$app/navigation';
+
+    let isProfileMenuOpen = false;
     let isProjectMenuOpen = false;
     let menuContainer: HTMLElement;
+    let menuTimeout: NodeJS.Timeout;
     let previousAuthState = false;
 
-    // Use the session directly from page data
     $: session = $page.data.session;
 
     // Log only when auth state changes
@@ -34,8 +35,8 @@
 
     async function handleSignOut() {
         try {
-            isProfileOpen = false;
-            isMenuOpen = false;
+            isProfileMenuOpen = false;
+            isProjectMenuOpen = false;
 
             // Clear all auth-related cookies first
             document.cookie.split(';').forEach(cookie => {
@@ -76,12 +77,10 @@
             // Remove the iframe and perform final cleanup
             setTimeout(() => {
                 iframe.remove();
-                // Force a hard reload to clear any remaining state
                 window.location.replace('/');
             }, 1000);
         } catch (error) {
             console.error('[NavBar] Sign-out error:', error);
-            // Force reload as fallback
             window.location.replace('/');
         }
     }
@@ -108,47 +107,61 @@
             console.error('[NavBar] Sign-in error:', error);
         }
     }
-  
+
     function handleLinkClick() {
-        isMenuOpen = false;
-        isProfileOpen = false;
-        isProjectMenuOpen = false;
-    }
-  
-    function toggleProfileMenu() {
-        isProfileOpen = !isProfileOpen;
+        isProfileMenuOpen = false;
         isProjectMenuOpen = false;
     }
 
-    function toggleProjectMenu() {
+    function toggleProjectMenu(event: MouseEvent) {
+        event.stopPropagation();
         isProjectMenuOpen = !isProjectMenuOpen;
-        isProfileOpen = false;
+        isProfileMenuOpen = false;
     }
 
-    function toggleMenu() {
-        isMenuOpen = !isMenuOpen;
-        if (isMenuOpen) {
-            isProfileOpen = false;
+    function toggleProfileMenu(event: MouseEvent) {
+        event.stopPropagation();
+        isProfileMenuOpen = !isProfileMenuOpen;
+        isProjectMenuOpen = false;
+    }
+
+    function handleMouseEnter(menu: 'profile' | 'project') {
+        if (menuTimeout) {
+            clearTimeout(menuTimeout);
+        }
+    }
+
+    function handleMouseLeave(menu: 'profile' | 'project') {
+        menuTimeout = setTimeout(() => {
+            if (menu === 'profile') {
+                isProfileMenuOpen = false;
+            } else {
+                isProjectMenuOpen = false;
+            }
+        }, 200);
+    }
+
+    function handleClickOutside(event: MouseEvent) {
+        const target = event.target as Node;
+        if (!(target as HTMLElement).closest('[data-menu-toggle]')) {
+            isProfileMenuOpen = false;
             isProjectMenuOpen = false;
         }
     }
 
-    function handleClickOutside(event: MouseEvent) {
-        if (menuContainer && !menuContainer.contains(event.target as Node)) {
-            isMenuOpen = false;
-        }
-    }
-
     onMount(() => {
-        window.addEventListener('click', handleClickOutside);
+        document.addEventListener('click', handleClickOutside);
         return () => {
-            window.removeEventListener('click', handleClickOutside);
+            document.removeEventListener('click', handleClickOutside);
+            if (menuTimeout) {
+                clearTimeout(menuTimeout);
+            }
         };
     });
 </script>
 
 <nav class="fixed top-0 w-full z-50 pb-8 px-0">
-    <div class={`backdrop-blur-sm bg-zinc-100/30 py-8 relative z-[60] ${isMenuOpen ? 'bg-zinc-100' : ''}`}>
+    <div class={`backdrop-blur-sm bg-zinc-100/30 py-8 relative z-[60] ${isProjectMenuOpen || isProfileMenuOpen ? 'bg-zinc-100' : ''}`}>
         <div class="max-w-5xl mx-auto px-4 sm:px-[22px]">
             <div class="flex items-center h-[96px]">
                 <div class="flex-shrink-0">
@@ -172,6 +185,7 @@
                         
                         <div class="relative">
                             <button 
+                                data-menu-toggle="project"
                                 on:click={toggleProjectMenu}
                                 class="flex items-center space-x-1 text-sm text-gray-600 hover:text-gray-900 transition-colors focus:outline-none"
                             >
@@ -180,8 +194,13 @@
                             </button>
 
                             {#if isProjectMenuOpen}
-                                <div class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                                    <div class="py-1" role="menu">
+                                <div 
+                                    class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+                                    on:mouseenter={() => handleMouseEnter('project')}
+                                    on:mouseleave={() => handleMouseLeave('project')}
+                                    role="menu"
+                                >
+                                    <div class="py-1" role="menuitem">
                                         <a
                                             href="/start-project"
                                             class="block px-4 py-2 text-sm text-gray-700 hover:text-[#ff6923]"
@@ -204,37 +223,48 @@
                         <div class="ml-auto text-sm text-gray-600 hover:text-gray-900 transition-colors">
                             {#if session && session.user}
                                 <div class="relative">
-                                  <button 
-                                  on:click={toggleProfileMenu}
-                                  class="flex items-center space-x-2 focus:outline-none"
-                              >
-                                  <img
-                                      src={session.user.image ?? '/images/default-avatar.png'}
-                                      alt={session.user.name ?? 'User avatar'}
-                                      class="h-8 w-8 rounded-full"
-                                  />
-                                  <span class="text-sm font-medium text-gray-600">{session.user.name ?? 'User'}</span>
-                                  <CaretDown size={16} class="text-gray-600" />
-                              </button>
-                                    
-                                    {#if isProfileOpen}
-                                        <div class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                                            <div class="py-1" role="menu">
-                                                <a
-                                                    href="/profile"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:text-[#ff6923]"
-                                                    role="menuitem"
-                                                >
-                                                    Your Profile
-                                                </a>
-                                                <button
-                                                    on:click={handleSignOut}
-                                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:text-[#ff6923]"
-                                                    role="menuitem"
-                                                >
-                                                    Sign out
-                                                </button>
-                                            </div>
+                                    <button 
+                                        type="button"
+                                        class="flex items-center space-x-2 focus:outline-none"
+                                        data-menu-toggle="profile"
+                                        on:click={toggleProfileMenu}
+                                    >
+                                        <img
+                                            src={session.user.image ?? '/images/default-avatar.png'}
+                                            alt={session.user.name ?? 'User avatar'}
+                                            class="h-8 w-8 rounded-full"
+                                        />
+                                        <span class="text-sm font-medium text-gray-600">{session.user.name ?? 'User'}</span>
+                                        <CaretDown size={16} class="text-gray-600" />
+                                    </button>
+
+                                    {#if isProfileMenuOpen}
+                                        <div
+                                            bind:this={menuContainer}
+                                            class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                            role="menu"
+                                            aria-orientation="vertical"
+                                            aria-labelledby="user-menu-button"
+                                            tabindex="-1"
+                                            transition:fade={{ duration: 100 }}
+                                            on:mouseenter={() => handleMouseEnter('profile')}
+                                            on:mouseleave={() => handleMouseLeave('profile')}
+                                        >
+                                            <a
+                                                href="/profile"
+                                                 class="block px-4 py-2 text-sm text-gray-700 hover:text-[#ff6923]"
+                                                role="menuitem"
+                                                on:click={handleLinkClick}
+                                            >
+                                                Your Profile
+                                            </a>
+                                            <button
+                                                on:click={handleSignOut}
+                                                 class="block px-4 py-2 text-sm text-gray-700 hover:text-[#ff6923]"
+                                                role="menuitem"
+                                            >
+                                                Sign out
+                                            </button>
                                         </div>
                                     {/if}
                                 </div>
@@ -251,13 +281,13 @@
                 </div>
                 <div class="md:hidden ml-auto">
                     <button
-                        on:click={toggleMenu}
+                        on:click={toggleProjectMenu}
                         class="text-gray-600 hover:text-gray-900 transition-colors p-2 relative w-[20px] h-[20px]"
                         aria-label="Toggle menu"
                     >
-                        <span class={`absolute left-2 block w-5 h-0.5 bg-current transform transition-all duration-300 ease-in-out ${isMenuOpen ? 'rotate-45 translate-y-0' : '-translate-y-1.5'}`}></span>
-                        <span class={`absolute left-2 block w-5 h-0.5 bg-current transform transition-all duration-300 ease-in-out ${isMenuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
-                        <span class={`absolute left-2 block w-5 h-0.5 bg-current transform transition-all duration-300 ease-in-out ${isMenuOpen ? '-rotate-45 translate-y-0' : 'translate-y-1.5'}`}></span>
+                        <span class={`absolute left-2 block w-5 h-0.5 bg-current transform transition-all duration-300 ease-in-out ${isProjectMenuOpen || isProfileMenuOpen ? 'rotate-45 translate-y-0' : '-translate-y-1.5'}`}></span>
+                        <span class={`absolute left-2 block w-5 h-0.5 bg-current transform transition-all duration-300 ease-in-out ${isProjectMenuOpen || isProfileMenuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
+                        <span class={`absolute left-2 block w-5 h-0.5 bg-current transform transition-all duration-300 ease-in-out ${isProjectMenuOpen || isProfileMenuOpen ? '-rotate-45 translate-y-0' : 'translate-y-1.5'}`}></span>
                     </button>
                 </div>
             </div>
@@ -265,7 +295,7 @@
     </div>
     <div 
         class={`md:hidden fixed inset-0 z-50 bg-zinc-100 px-8 transition-all duration-300 ease-in-out ${
-            isMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
+            isProjectMenuOpen || isProfileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
         }`}
     >
         <div class="flex flex-col items-start h-screen pt-20">
