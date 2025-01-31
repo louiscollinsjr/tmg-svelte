@@ -75,7 +75,7 @@
 </script>
 
   <div class="relative w-full py-2 pb-16" style="background-image: linear-gradient(to right, transparent, rgb(229 231 235) 15%, rgb(229 231 235) 85%, transparent); background-position: bottom; background-size: 100% 1px; background-repeat: no-repeat;">
-      <div class="relative flex items-start w-full overflow-hidden rounded-2xl bg-white p-4 border border-gray-100 shadow-sm">
+      <div class="relative flex items-start w-full overflow-hidden rounded-2xl bg-white p-4 shadow-sm">
           <div class="absolute left-[12px] top-[12px] p-4 rounded-full bg-orange-500">
              <MagnifyingGlass size={20} weight="bold" class="text-white" />
         </div>

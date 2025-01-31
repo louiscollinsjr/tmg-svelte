@@ -35,11 +35,11 @@
 
     function handleFilterSelect(filter: string) {
         selectedFilter = filter;
-        console.log('Selected Filter:', selectedFilter);
+        //console.log('Selected Filter:', selectedFilter);
     }
     function handleCategorySelect(category: string) {
          selectedCategory = category;
-           console.log('Selected Category:', selectedCategory);
+           //console.log('Selected Category:', selectedCategory);
     }
 
     onMount(() => {
@@ -50,9 +50,9 @@
 
     async function loadImages() {
         try {
-            console.log('Starting to load images...');
+         //   console.log('Starting to load images...');
             const imageFiles = import.meta.glob('../../explore-designs/*.(png|jpg|jpeg|gif|svg)', { eager: true });
-            console.log('Image files found:', Object.keys(imageFiles));
+        //    console.log('Image files found:', Object.keys(imageFiles));
             
             allImages = Object.values(imageFiles).map((image) => {
                 const imagePath = (image as { default: string }).default;
@@ -61,20 +61,19 @@
             });
             
             if (allImages.length === 0) {
-                console.warn('No images found in the specified directory');
+            //    console.warn('No images found in the specified directory');
             } else {
-                console.log('Successfully loaded images:', allImages);
+             //   console.log('Successfully loaded images:', allImages);
             }
             
             loadMoreImages();
         } catch (err) {
-            console.error('Error loading images:', err);
-            console.error('Error details:', { 
-                name: err.name, 
-                message: err.message, 
-                stack: err.stack 
-            });
-            allImages = [];
+         //   console.error('Error loading images:', err);
+         //   console.error('Error details:', {
+         //       name: err.name, 
+         //       message: err.message, 
+         //       stack: err.stack 
+         //   });
         }
     }
 

@@ -1,9 +1,51 @@
 <!-- src/routes/find-work/+page.svelte -->
 <script lang="ts">
-	import PricingTiers from '../components/PricingTiers.svelte';
+    import PricingTiers from '../components/PricingTiers.svelte';
+    import ProjectList from '../components/ProjectList.svelte';
+    import { page } from '$app/stores';
+
+    $: session = $page.data.session;
+    $: isPro = $page.data.isPro;
+    $: pendingProjects = $page.data.pendingProjects;
+    $: console.log('Pending projects:', pendingProjects);
 </script>
 
-<div class="min-h-screen pt-32">
+<div class="min-h-screen py-40">
+    {#if session?.user && isPro}
+    <div class="">
+		<div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+			<div class="text-center">
+				<h1
+					class="mb-6 font-sourceserif text-4xl font-[400] tracking-wide text-gray-900 md:text-6xl md:leading-[1.2]"
+				>
+					Find your <span
+						class="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent"
+						>next project.</span
+					>
+				</h1>
+                <p class="mx-auto mb-8 max-w-2xl font-sans text-lg font-normal tracking-wide text-gray-900">
+                    Explore a list of local jobs tailored to your skills. Choose the projects that fit your schedule and expertise—your next great opportunity is just a click away.
+                </p>
+			</div>
+		</div>
+	</div>
+        <!-- Authenticated Pro users see pending projects -->
+        <div class="mx-auto max-w-6xl px-4">
+            <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl px-20">Available Projects</h2>
+            <p class="mt-4 text-lg text-gray-500 px-20">Here are the latest projects matching your skills.</p>
+            
+            <div class="mt-8">
+                {#if pendingProjects.length > 0}
+                    <ProjectList projects={pendingProjects} />
+                {:else}
+                    <p class="text-gray-500 px-20">No projects available at the moment. Check back soon!</p>
+                {/if}
+            </div>
+        </div>
+    {:else}
+
+<!-- else Non-authenicated users show join community and pricing tiers below  -->
+
 	<!-- {/* Hero Section */} -->
 	<div class="">
 		<div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
@@ -81,4 +123,5 @@
 			</div>
 		</div>
 	</div>
+    {/if}
 </div>

@@ -3,7 +3,7 @@
     import { page } from '$app/stores';
     import {Star, ShareFat, Heart} from "phosphor-svelte";
     $: data = $page.data;
-    $: console.log('Professional Profile Data:', data);
+    //$: console.log('Professional Profile Data:', data);
     $: isOwnProfile = data.session?.user && data.professional._id === data.session.user.id;
     $: isSaved = data.isSaved;
 

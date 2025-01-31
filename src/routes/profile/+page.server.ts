@@ -38,10 +38,10 @@ function serializeDocument(doc: any): any {
 export const load: PageServerLoad = async ({ locals }) => {
     try {
         const session = await locals.auth();
-        console.log('Session:', session);
+        // console.log('Session:', session);
         
         if (!session?.user) {
-            console.log('No session user, redirecting');
+            // console.log('No session user, redirecting');
             throw redirect(302, '/');
         }
 
@@ -53,7 +53,7 @@ export const load: PageServerLoad = async ({ locals }) => {
         // Try finding by _id first
         let userData = null;
         if (session.user.id) {
-            console.log('Looking for user with _id:', session.user.id);
+            // console.log('Looking for user with _id:', session.user.id);
             try {
                 userData = await User.findById(session.user.id).lean();
             } catch (e) {
@@ -63,12 +63,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 
         // If not found by _id, try email
         if (!userData && session.user.email) {
-            console.log('Looking for user with email:', session.user.email);
+            // console.log('Looking for user with email:', session.user.email);
             userData = await User.findOne({ email: session.user.email }).lean();
         }
 
         if (!userData) {
-            console.log('No user data found');
+            // console.log('No user data found');
             return {
                 session,
                 userData: null,

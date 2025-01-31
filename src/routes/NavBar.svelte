@@ -24,11 +24,11 @@
     $: {
         const currentAuthState = !!session;
         if (import.meta.env.DEV && currentAuthState !== previousAuthState) {
-            console.log('[NavBar] Auth State Change:', {
-                isAuthenticated: currentAuthState,
-                user: session?.user?.name,
-                action: currentAuthState ? 'SIGN_IN' : 'SIGN_OUT'
-            });
+            // console.log('[NavBar] Auth State Change:', {
+            //     isAuthenticated: currentAuthState,
+            //     user: session?.user?.name,
+            //     action: currentAuthState ? 'SIGN_IN' : 'SIGN_OUT'
+            // });
             previousAuthState = currentAuthState;
         }
     }
@@ -179,48 +179,25 @@
                 </div>
                 <div class="hidden md:flex flex-grow justify-center">
                     <div class="flex items-center space-x-10">
-                        <a href="/explore-designs" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                        <a href="/explore-designs" class="text-sm text-gray-600 hover:text-[#ff6923] transition-colors">
                             Explore Designs
                         </a>
                         
                         <div class="relative">
-                            <button 
-                                data-menu-toggle="project"
-                                on:click={toggleProjectMenu}
-                                class="flex items-center space-x-1 text-sm text-gray-600 hover:text-gray-900 transition-colors focus:outline-none"
-                            >
-                                <span>Hire a tradesperson</span>
-                                <CaretDown size={16} />
-                            </button>
+                          
+                            <a href="/start-project" class="text-sm text-gray-600 hover:text-[#ff6923] transition-colors">
+                                Start a project
+                            </a>
 
-                            {#if isProjectMenuOpen}
-                                <div 
-                                    class="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
-                                    on:mouseenter={() => handleMouseEnter('project')}
-                                    on:mouseleave={() => handleMouseLeave('project')}
-                                    role="menu"
-                                >
-                                    <div class="py-1" role="menuitem">
-                                        <a
-                                            href="/start-project"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:text-[#ff6923]"
-                                            role="menuitem"
-                                            on:click={handleLinkClick}
-                                        >
-                                            Start a project
-                                        </a>
-                                    </div>
-                                </div>
-                            {/if}
                         </div>
 
-                        <a href="/find-work" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                        <a href="/find-work" class="text-sm text-gray-600 hover:text-[#ff6923] transition-colors">
                             Find Jobs
                         </a>
-                        <a href="/help-center" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                        <a href="/help-center" class="text-sm text-gray-600 hover:text-[#ff6923] transition-colors">
                             Help Center
                         </a>
-                        <div class="ml-auto text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                        <div class="ml-auto text-sm text-gray-600 hover:text-[#ff6923] transition-colors">
                             {#if session && session.user}
                                 <div class="relative">
                                     <button 
@@ -234,8 +211,8 @@
                                             alt={session.user.name ?? 'User avatar'}
                                             class="h-8 w-8 rounded-full"
                                         />
-                                        <span class="text-sm font-medium text-gray-600">{session.user.name ?? 'User'}</span>
-                                        <CaretDown size={16} class="text-gray-600" />
+                                        <span class="text-sm font-medium text-gray-600 hover:text-[#ff6923]">{session.user.name ?? 'User'}</span>
+                                        <CaretDown size={16} class="text-gray-600 hover:text-[#ff6923]" />
                                     </button>
 
                                     {#if isProfileMenuOpen}

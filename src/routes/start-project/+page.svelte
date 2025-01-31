@@ -29,7 +29,7 @@
 	}
 
 	function updateTimelineObject() {
-        console.log("timeline is: ", $form.timeline)
+       // console.log("timeline is: ", $form.timeline)
         if ($form.timeline) {
             let startDate = new Date();
             switch ($form.timeline) {
@@ -74,9 +74,9 @@
 	let budgetDisplay = '';
 
 	$: if (form) {
-		console.log('form changed:', $form);
+		//console.log('form changed:', $form);
 		budgetValue = $form.budget;
-		console.log('budgetValue:', budgetValue);
+		//console.log('budgetValue:', budgetValue);
 	}
 
 	function formatBudget(value?: number) {
@@ -106,30 +106,30 @@
 	const { form, errors, message, enhance, validateForm, options, reset } = superForm(data.form, {
 		dataType: 'json',
 		async onSubmit({ cancel, submitter }) {
-			console.log('onSubmit triggered');
+			//console.log('onSubmit triggered');
 
 			// Validate the current step
 			const result = await validateForm();
-			console.log('Validation result:', result);
+			//console.log('Validation result:', result);
 
 			if (!result.valid) {
-				console.log('Form is invalid');
+				//console.log('Form is invalid');
 				cancel();
 				return;
 			}
 
 			if (step < totalSteps) {
 				// Proceed to the next step for intermediate steps
-				console.log('Form is valid, calling nextStep()');
+				//console.log('Form is valid, calling nextStep()');
 				nextStep();
 				cancel();
 			} else {
 				// On the last step, allow form submission
-				console.log('Last step, submitting form');
+				//console.log('Last step, submitting form');
 			}
 		},
 		async onResult({ result }) {
-			console.log('Form submission result:', result);
+			//console.log('Form submission result:', result);
 			// Only show errors for non-redirect failures
 			if (result.type === 'success') {
 				// Reset the form

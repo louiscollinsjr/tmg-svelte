@@ -36,7 +36,7 @@ export const actions: Actions = {
 		const form = await superValidate(request, zod(combinedSchema));
 
 		try {
-			console.log('Received form data in submitProject:', form);
+		//	console.log('Received form data in submitProject:', form);
 
 			if (!form.valid) {
 				console.error('Form validation failed on server:', form.errors);
@@ -78,7 +78,7 @@ export const actions: Actions = {
 
 async function saveProject(formData: ProjectFormData, user: any) {
 	try {
-		console.log('saveProject called with data:', formData);
+		// console.log('saveProject called with data:', formData);
 		await connectDB();
 		const Project = getProjectModel();
 		const User = getUserModel();
@@ -130,7 +130,7 @@ async function saveProject(formData: ProjectFormData, user: any) {
 
 		// Save the project
 		const savedProject = await project.save();
-		console.log('Project saved successfully:', savedProject);
+	//	console.log('Project saved successfully:', savedProject);
 		return savedProject;
 	} catch (error) {
 		console.error('Error saving project:', error);

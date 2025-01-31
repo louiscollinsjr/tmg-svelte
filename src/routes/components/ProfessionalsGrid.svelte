@@ -12,10 +12,10 @@
   
   let session;
 
-  $: {
-      console.log('ProfessionalsGrid - Selected Category:', selectedCategory);
-      console.log('ProfessionalsGrid - Input Professionals:', professionals);
-  }
+  // $: {
+  //     console.log('ProfessionalsGrid - Selected Category:', selectedCategory);
+  //     console.log('ProfessionalsGrid - Input Professionals:', professionals);
+  // }
 
   onMount(async () => {
       session = get(auth);
