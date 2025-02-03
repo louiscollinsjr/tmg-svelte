@@ -3,7 +3,13 @@ import { SvelteKitAuth } from "@auth/sveltekit";
 import Google from "@auth/core/providers/google";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import { MongoClient, ObjectId } from 'mongodb';
-import { AUTH_GOOGLE_CLIENT_ID, AUTH_GOOGLE_CLIENT_SECRET, AUTH_SECRET, MONGODB_URI } from "$env/static/private";
+import { AUTH_GOOGLE_CLIENT_ID, AUTH_GOOGLE_CLIENT_SECRET, AUTH_SECRET, MONGODB_URI, AUTH_APPLE_CLIENT_ID, AUTH_APPLE_CLIENT_SECRET } from "$env/static/private";
+import Apple from "@auth/core/providers/apple";
+import CredentialsProvider from "@auth/core/providers/credentials";
+import type { Provider } from "@auth/core/providers";
+import type { CredentialsConfig } from "@auth/core/providers/credentials";
+import { verifyPassword } from "./auth-utils"; // Ensure this path matches your actual utils location
+
 
 const uri = MONGODB_URI;
 const client = new MongoClient(uri);
@@ -12,18 +18,45 @@ export const authHandler = SvelteKitAuth({
     adapter: MongoDBAdapter(client),
     providers: [
         Google({
-            clientId: AUTH_GOOGLE_CLIENT_ID, 
-            clientSecret: AUTH_GOOGLE_CLIENT_SECRET,
-            allowDangerousEmailAccountLinking: true,
-            authorization: {
-                params: {
-                    prompt: "select_account",
-                    access_type: "offline",
-                    response_type: "code"
-                }
+          clientId: AUTH_GOOGLE_CLIENT_ID,
+          clientSecret: AUTH_GOOGLE_CLIENT_SECRET,
+          allowDangerousEmailAccountLinking: true,
+          authorization: { 
+            params: {
+              prompt: "select_account",
+              access_type: "offline",
+              response_type: "code"
             }
+          }
         }),
-    ],
+        Apple({
+          clientId: AUTH_APPLE_CLIENT_ID,
+          clientSecret: AUTH_APPLE_CLIENT_SECRET
+        }),
+        CredentialsProvider({
+          name: "Email",
+          credentials: {
+            email: { label: "Email", type: "email" },
+            password: { label: "Password", type: "password" }
+          },
+          async authorize(credentials: Partial<Record<'email' | 'password', unknown>>) {
+            if (typeof credentials.email !== 'string' || typeof credentials.password !== 'string') {
+              return null;
+            }
+            const db = client.db('tmg-ai-assist-db');
+            const user = await db.collection('users').findOne({ email: credentials.email });
+            
+            if (!user) return null;
+            
+            const isValid = await verifyPassword(
+              credentials.password,
+              user.passwordHash
+            );
+            
+            return isValid ? user : null;
+          }
+        })
+      ],
     secret: AUTH_SECRET,
     trustHost: true,
     session: {

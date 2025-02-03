@@ -40,7 +40,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['active', 'inactive', 'suspended'],
         default: 'active'
-    }
+    },
+    passwordHash: String,
+    providers: [{
+      name: { type: String, enum: ['google', 'apple', 'email'] },
+      providerId: String,
+      createdAt: Date
+    }],
+    emailVerified: Date
 }, {
     timestamps: true
 });
