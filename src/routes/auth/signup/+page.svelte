@@ -1,11 +1,7 @@
 <!-- src/routes/auth/signup/+page.svelte -->
 <script>
 	import BackgroundPattern from '../../components/BackgroundPattern.svelte';
-  import { goto } from '$app/navigation';
-  import { auth } from '$lib/stores';
   import { signIn } from '@auth/sveltekit/client';
-
-  
 
   export const benefits = [
   {
@@ -127,30 +123,30 @@
         />
       </svg>`,
   },
-
-  async function handleGoogleSignIn(e: Event) {
-        e.preventDefault();
-        try {
-            // Clear existing auth state
-            document.cookie.split(';').forEach(cookie => {
-                const [name] = cookie.split('=').map(c => c.trim());
-                if (name.startsWith('next-auth') || name.includes('auth')) {
-                    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-                }
-            });
-            
-            auth.set(null); // Reset auth store
-
-            await signIn('google', { 
-                callbackUrl: '/profile', // Or your desired redirect path
-                prompt: 'select_account'
-            });
-        } catch (error) {
-            console.error('[Login] Google sign-in error:', error);
-            error = 'Failed to sign in with Google';
-        }
-    }
 ];
+
+async function handleGoogleSignIn(e) {
+    e.preventDefault();
+    try {
+        // Clear existing auth state
+        document.cookie.split(';').forEach(cookie => {
+            const [name] = cookie.split('=').map(c => c.trim());
+            if (name.startsWith('next-auth') || name.includes('auth')) {
+                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+            }
+        });
+        
+        auth.set(null); // Reset auth store
+
+        await signIn('google', { 
+            callbackUrl: '/profile', // Or your desired redirect path
+            prompt: 'select_account'
+        });
+    } catch (error) {
+        console.error('[Login] Google sign-in error:', error);
+        error = 'Failed to sign in with Google';
+    }
+}
 
   function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
