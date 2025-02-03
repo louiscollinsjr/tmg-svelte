@@ -12,14 +12,20 @@ const handleAuth: Handle = async ({ event, resolve }) => {
     return response;
 };
 
+// src/hooks.server.ts
 const handleSession: Handle = async ({ event, resolve }) => {
-    if (!event.locals.auth) {
-        return await resolve(event);
-    }
-    
-    const session = await event.locals.auth();
-    event.locals.session = session;
-    return await resolve(event);
+  console.log('Session check started');
+  
+  if (!event.locals.auth) {
+      console.log('No auth found in locals');
+      return await resolve(event);
+  }
+  
+  const session = await event.locals.auth();
+  console.log('Session data:', session);
+  
+  event.locals.session = session;
+  return await resolve(event);
 };
 
 // New handler for form session

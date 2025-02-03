@@ -18,15 +18,9 @@
   </script>
   
   {#if mounted}
-    <div class="absolute inset-0 z-1 {patternClassName}">
-      <!-- Radial gradient overlay (using Tailwind classes) -->
+    <div class="absolute inset-0 z-1 {patternClassName} overflow-hidden">
       <div class="absolute inset-0 bg-gradient-to-b from-gray-50 to-transparent z-5" />
-  
-      <!-- Icons grid (using Tailwind classes) -->
-      <div
-        class="absolute inset-0 grid grid-cols-6 md:grid-cols-6 lg:grid-cols-12 gap-2"
-        style:opacity
-      >
+      <div class="absolute inset-0 grid grid-cols-6 md:grid-cols-6 lg:grid-cols-12 gap-2"style:opacity>
         {#each Array.from({ length: 72 }) as _, index}
           {@const iconName = backgroundIcons[index % backgroundIcons.length]}
           <div
@@ -43,3 +37,5 @@
       </div>
     </div>
   {/if}
+
+

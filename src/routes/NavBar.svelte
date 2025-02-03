@@ -247,7 +247,7 @@
                                 </div>
                             {:else}
                                 <button
-                                    on:click={handleSignIn}
+                                    on:click={() => goto('/login')}
                                     class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                                 >
                                     Sign in
@@ -312,7 +312,7 @@
                     </div>
                 {:else}
                     <button
-                        on:click={handleSignIn}
+                        on:click={() => goto('/login')}
                         class="text-2xl text-gray-600 hover:text-gray-900 transition-colors"
                     >
                         Sign in

@@ -43,7 +43,7 @@ export const authHandler = SvelteKitAuth({
             if (typeof credentials.email !== 'string' || typeof credentials.password !== 'string') {
               return null;
             }
-            const db = client.db('tmg-ai-assist-db');
+            const db = client.db('test');
             const user = await db.collection('users').findOne({ email: credentials.email });
             
             if (!user) return null;
@@ -75,7 +75,7 @@ export const authHandler = SvelteKitAuth({
     callbacks: {
         async signIn({ user, account, profile }) {
             try {
-                const db = client.db('tmg-ai-assist-db');
+                const db = client.db('test');
                 const existingUser = await db.collection('users').findOne({ email: user.email });
                 
                 if (!existingUser) {
@@ -155,7 +155,7 @@ export const authHandler = SvelteKitAuth({
         }
     },
     pages: {
-        signIn: '/auth/signin',
+        signIn: '/login',
         error: '/auth/error'
     }
 });

@@ -29,9 +29,13 @@
 </script>
 
 <ParaglideJS {i18n}>
-   <NavBar />
+    {#if $page.url.pathname !== '/auth/signup' && $page.url.pathname !== '/login'}
+        <NavBar />
+    {/if}
     <main class="min-h-screen max-w-screen mx-auto bg-zinc-50">
         {@render children()}
     </main>
-	<Footer />
+	{#if $page.url.pathname !== '/auth/signup' && $page.url.pathname !== '/login'}
+        <Footer />
+    {/if}
 </ParaglideJS>

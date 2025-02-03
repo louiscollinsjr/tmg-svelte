@@ -137,13 +137,13 @@
  </script>
 
 <div class="">
-	<BackgroundPattern opacity="0.05" patternClassName="bg-[#09a7a8]/5" />
+	<BackgroundPattern opacity="0.05" patternClassName="bg-[#09a7a8]/15" />
 	<div class="relative flex min-h-screen items-center justify-center">
     <!-- create reponsive two colmns that are equal in size and centered oneside-->
  <div class="flex space-x-4">
-  <div class="flex flex-col">
+  <div class="flex flex-col min-w-1/2 pt-4">
     <!-- tmg svg logo -->
-    <img src="/images/tmg_flags.png" alt="Try My Guys Logo" class="w-32 h-auto ml-0" />
+    <img src="/images/tmg_flags.png" alt="Try My Guys Logo" class="w-28 h-auto ml-0" />
     <!-- benefits of using trymyguys list -->
     <div class="">
       <ul class="mt-4 ml-4 space-y-12 pt-10 w-[65%] font-roboto">
@@ -161,10 +161,10 @@
       </ul>
     </div>
   </div>
-		<div class="w-full max-w-md space-y-8 rounded-lg bg-[#f8f7f3] p-10 shadow-lg">
-			<div class="pt-6 text-center">
-				<h2 class="font-sourceserif text-4xl">Create your account</h2>
-				<p class="mt-2 text-sm text-gray-600">
+		<div class="w-full max-w-md space-y-8 rounded-lg bg-[#f8f7f3] p-10 shadow-lg border border-gray-200">
+			<div class="pt-2 text-center">
+				<h2 class="font-sourceserif text-3xl">Create your account</h2>
+				<p class="mt-4 text-sm text-gray-600">
 					Welcome! Please fill in the details to get started.
 				</p>
 			</div>
@@ -201,7 +201,7 @@
 							>
 							Google
 						</button>
-						<button
+						<button disabled
 							type="submit"
 							class="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-[#f8f7f3] px-4 py-3 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
 						>
@@ -228,31 +228,43 @@
 				</div>
 			</div>
 			<form class="flex flex-col gap-4">
-				<div class="grid grid-cols-2 gap-4 text-sm">
-					<input
-						class="rounded-md border border-gray-300 bg-[#f8f7f3] p-2"
-						type="text"
-						placeholder="First Name"
-						name="firstName"
-					/>
-					<input
-						class="rounded-md border border-gray-300 bg-[#f8f7f3] p-2"
-						type="text"
-						placeholder="Last Name"
-						name="lastName"
-					/>
-				</div>
+				<div class="grid grid-cols-2 gap-4">
+          <!-- First Name Group -->
+          <div class="space-y-1">
+              <p class="text-sm text-gray-900">First name</p>
+              <input
+                  class="w-full rounded-md border border-gray-300 bg-[#f8f7f3] p-2 placeholder:text-gray-200"
+                  type="text"
+                  placeholder="First Name"
+                  name="firstName"
+                  required
+              />
+          </div>
+      
+          <!-- Last Name Group -->
+          <div class="space-y-1">
+              <p class="text-sm text-gray-900">Last name</p>
+              <input
+                  class="w-full rounded-md border border-gray-300 bg-[#f8f7f3] p-2 placeholder:text-gray-200"
+                  type="text"
+                  placeholder="Last Name"
+                  name="lastName"
+                  required
+              />
+          </div>
+      </div>
 				<!-- <input class="border border-gray-300 bg-[#f8f7f3] p-2 rounded-md" type="text" placeholder="Username" name="userName" required /> -->
-				<input
-					class="rounded-md border border-gray-300 bg-[#f8f7f3] p-2 text-sm" 
+				<p class=" text-sm text-gray-900" aria-label="email">Email address</p>
+        <input
+					class="rounded-md border border-gray-300 bg-[#f8f7f3] p-2 text-sm placeholder:text-gray-200" 
 					type="email"
 					placeholder="Email address"
 					name="email"
 					required
 				/>
-
+        <p class=" text-sm text-gray-900" aria-label="email">Password</p>
 				<input
-					class="rounded-md border border-gray-300 bg-[#f8f7f3] p-2 text-sm"
+					class="rounded-md border border-gray-300 bg-[#f8f7f3] p-2 text-sm placeholder:text-gray-200"
 					type="password"
 					placeholder="Password"
 					name="password"
@@ -261,7 +273,7 @@
 
 				<div class="relative pt-8">
 					<button
-						class="focus:shadow-outline shadow-sm w-full rounded bg-[#ff6823] px-4 py-2 font-roboto text-sm text-white hover:bg-[#ff6823] focus:outline-none"
+						class="focus:shadow-outline shadow-sm w-full rounded-lg bg-[#ff6823] px-4 py-2 font-roboto text-sm text-white hover:bg-[#ff6823] focus:outline-none"
 						type="submit">Continue</button
 					>
 				</div>
