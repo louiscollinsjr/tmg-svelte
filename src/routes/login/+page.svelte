@@ -161,8 +161,8 @@
 					>
 				</div>
 			</form>
-			<p class="text-center text-sm text-gray-500">
-				Already have an account? <a href="/auth/signup" class="text-[#ff6823] text-xs font-bold hover:underline">Sign up</a>
+			<p class="text-center text-[13px] font-normal font-roboto text-gray-500">
+				Don’t have an account? <a href="/auth/signup" class="text-[#ff6823] text-xs font-bold hover:underline">Sign up</a>
 			</p>
 
 			<p class="mt-4 text-center text-xs text-gray-500">

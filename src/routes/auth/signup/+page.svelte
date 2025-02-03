@@ -1,6 +1,11 @@
 <!-- src/routes/auth/signup/+page.svelte -->
 <script>
 	import BackgroundPattern from '../../components/BackgroundPattern.svelte';
+  import { goto } from '$app/navigation';
+  import { auth } from '$lib/stores';
+  import { signIn } from '@auth/sveltekit/client';
+
+  
 
   export const benefits = [
   {
@@ -122,6 +127,29 @@
         />
       </svg>`,
   },
+
+  async function handleGoogleSignIn(e: Event) {
+        e.preventDefault();
+        try {
+            // Clear existing auth state
+            document.cookie.split(';').forEach(cookie => {
+                const [name] = cookie.split('=').map(c => c.trim());
+                if (name.startsWith('next-auth') || name.includes('auth')) {
+                    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+                }
+            });
+            
+            auth.set(null); // Reset auth store
+
+            await signIn('google', { 
+                callbackUrl: '/profile', // Or your desired redirect path
+                prompt: 'select_account'
+            });
+        } catch (error) {
+            console.error('[Login] Google sign-in error:', error);
+            error = 'Failed to sign in with Google';
+        }
+    }
 ];
 
   function shuffle(array) {
@@ -175,9 +203,10 @@
 					<div class="flex-2 flex flex-col space-y-4">
 						<div class="flex space-x-4 text-sm">
 							<button
-								type="submit"
-								class="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-[#f8f7f3] px-2 py-2 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
-							>
+              type="button"
+              on:click|preventDefault={handleGoogleSignIn}
+              class="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-[#f8f7f3] px-2 py-2 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+          >
 								<svg
 									width="16"
 									height="16"
