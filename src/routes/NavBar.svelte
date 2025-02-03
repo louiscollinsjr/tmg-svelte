@@ -41,18 +41,15 @@
             // Clear all auth-related cookies first
             document.cookie.split(';').forEach(cookie => {
                 const [name] = cookie.split('=').map(c => c.trim());
-                if (name.startsWith('next-auth') || 
-                    name.includes('auth') || 
-                    name.includes('session') || 
-                    name.includes('oauth') ||
-                    name.includes('google')) {
+                if (name.startsWith('next-auth.session-token') ||  
+                    name.includes('auth.session') ){
                     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
                     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/auth`;
                 }
             });
             
             // Clear localStorage and sessionStorage
-            ['auth', 'session', 'token', 'oauth', 'google'].forEach(key => {
+            ['next-auth.session-token', 'auth.session'].forEach(key => {
                 localStorage.removeItem(key);
                 localStorage.removeItem(`${key}.state`);
                 sessionStorage.removeItem(key);

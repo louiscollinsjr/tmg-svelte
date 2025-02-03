@@ -283,7 +283,7 @@ async function handleGoogleSignIn() {
 					required
 				/>
 
-				<!-- Google Sign Up Button -->
+				<!-- Google Sign Up Button
 				<button
 					type="button"
 					on:click={handleGoogleSignIn}
@@ -291,7 +291,7 @@ async function handleGoogleSignIn() {
 				>
 					<img src="/images/google.svg" alt="Google" class="h-5 w-5" />
 					Continue with Google
-				</button>
+				</button> -->
 
 				<div class="relative pt-8">
 					<button
@@ -300,7 +300,7 @@ async function handleGoogleSignIn() {
 					>
 				</div>
 			</form>
-			<p class="text-center text-sm text-gray-500">
+			<p class="text-center text-[13px] font-normal font-roboto text-gray-500">
 				Already have an account? <a href="/login" class="text-[#ff6823] text-xs font-bold hover:underline">Sign in</a>
 			</p>
 
