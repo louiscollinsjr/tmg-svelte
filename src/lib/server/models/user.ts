@@ -32,7 +32,11 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     image: String,
     isPro: { type: Boolean, default: false },
-    providers: [providerSchema],
+    providers: [{
+      name: String,
+      providerId: String,
+      lastLogin: Date
+    }],
     businessInfo: businessInfoSchema,
     preferences: preferencesSchema,
     lastActive: Date,
@@ -42,11 +46,6 @@ const userSchema = new mongoose.Schema({
         default: 'active'
     },
     passwordHash: String,
-    providers: [{
-      name: { type: String, enum: ['google', 'apple', 'email'] },
-      providerId: String,
-      createdAt: Date
-    }],
     emailVerified: Date
 }, {
     timestamps: true

@@ -1,7 +1,9 @@
 <!-- src/routes/auth/signup/+page.svelte -->
 <script>
 	import BackgroundPattern from '../../components/BackgroundPattern.svelte';
-  import { signIn } from '@auth/sveltekit/client';
+	import { signIn } from '@auth/sveltekit/client';
+	import { auth } from '$lib/stores';
+	import { goto } from '$app/navigation';
 
   export const benefits = [
   {
@@ -125,26 +127,11 @@
   },
 ];
 
-async function handleGoogleSignIn(e) {
-    e.preventDefault();
+async function handleGoogleSignIn() {
     try {
-        // Clear existing auth state
-        document.cookie.split(';').forEach(cookie => {
-            const [name] = cookie.split('=').map(c => c.trim());
-            if (name.startsWith('next-auth') || name.includes('auth')) {
-                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-            }
-        });
-        
-        auth.set(null); // Reset auth store
-
-        await signIn('google', { 
-            callbackUrl: '/profile', // Or your desired redirect path
-            prompt: 'select_account'
-        });
+        await signIn('google', { callbackUrl: '/profile' });
     } catch (error) {
-        console.error('[Login] Google sign-in error:', error);
-        error = 'Failed to sign in with Google';
+        console.error('Google sign-in error:', error);
     }
 }
 
@@ -295,6 +282,16 @@ async function handleGoogleSignIn(e) {
 					name="password"
 					required
 				/>
+
+				<!-- Google Sign Up Button -->
+				<button
+					type="button"
+					on:click={handleGoogleSignIn}
+					class="flex w-full items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 border border-gray-300"
+				>
+					<img src="/images/google.svg" alt="Google" class="h-5 w-5" />
+					Continue with Google
+				</button>
 
 				<div class="relative pt-8">
 					<button

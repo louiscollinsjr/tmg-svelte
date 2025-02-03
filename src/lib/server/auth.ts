@@ -9,7 +9,7 @@ import CredentialsProvider from "@auth/core/providers/credentials";
 import type { Provider } from "@auth/core/providers";
 import type { CredentialsConfig } from "@auth/core/providers/credentials";
 import { verifyPassword } from "./auth-utils"; // Ensure this path matches your actual utils location
-
+import { User } from './models/User'; // Add User model import
 
 const uri = MONGODB_URI;
 const client = new MongoClient(uri);
@@ -23,9 +23,10 @@ export const authHandler = SvelteKitAuth({
           allowDangerousEmailAccountLinking: true,
           authorization: { 
             params: {
-              prompt: "select_account",
-              access_type: "offline",
-              response_type: "code"
+                prompt: "select_account",
+                access_type: "offline",
+                response_type: "code",
+                scope: "openid email profile"
             }
           }
         }),
@@ -74,86 +75,86 @@ export const authHandler = SvelteKitAuth({
     },
     callbacks: {
         async signIn({ user, account, profile }) {
-            try {
+            if (account?.provider === 'google') {
+              try {
                 const db = client.db('test');
-                const existingUser = await db.collection('users').findOne({ email: user.email });
+                const usersCollection = db.collection('users');
                 
-                if (!existingUser) {
-                    await db.collection('users').insertOne({
-                        _id: new ObjectId(user.id),
-                        email: user.email,
-                        name: user.name,
-                        image: user.image,
-                        isPro: false,
-                        providers: [{
-                            name: account.provider,
+                // Check if user exists
+                const existingUser = await usersCollection.findOne({ email: profile.email });
+                
+                if (existingUser) {
+                  // Check if Google provider exists
+                  const hasGoogleProvider = existingUser.providers?.some(p => p.name === 'google');
+                  
+                  if (hasGoogleProvider) {
+                    // Update existing Google provider's lastLogin
+                    await usersCollection.updateOne(
+                      { email: profile.email, 'providers.name': 'google' },
+                      {
+                        $set: {
+                          'providers.$.lastLogin': new Date(),
+                          'providers.$.providerId': profile.sub,
+                          name: profile.name,
+                          image: profile.picture,
+                          updatedAt: new Date()
+                        }
+                      }
+                    );
+                  } else {
+                    // Add Google provider to existing user
+                    await usersCollection.updateOne(
+                      { email: profile.email },
+                      {
+                        $push: {
+                          providers: {
+                            name: 'google',
                             providerId: profile.sub,
                             lastLogin: new Date()
-                        }],
-                        businessInfo: {
-                            serviceArea: [],
-                            specialties: []
+                          }
                         },
-                        preferences: {
-                            notifications: {
-                                email: true,
-                                push: true,
-                                marketing: false
-                            },
-                            visibility: 'public'
-                        },
-                        lastActive: new Date(),
-                        status: 'active',
-                        createdAt: new Date(),
-                        updatedAt: new Date()
-                    });
-                } else {
-                    // Update last login and provider info
-                    await db.collection('users').updateOne(
-                        { email: user.email },
-                        {
-                            $set: {
-                                lastActive: new Date(),
-                                updatedAt: new Date(),
-                                name: user.name,
-                                image: user.image
-                            }
+                        $set: {
+                          name: profile.name,
+                          image: profile.picture,
+                          updatedAt: new Date()
                         }
+                      }
                     );
+                  }
+                } else {
+                  // Create new user
+                  await usersCollection.insertOne({
+                    email: profile.email,
+                    name: profile.name,
+                    image: profile.picture,
+                    providers: [{
+                      name: 'google',
+                      providerId: profile.sub,
+                      lastLogin: new Date()
+                    }],
+                    isPro: false,
+                    status: 'active',
+                    preferences: {
+                      notifications: {
+                        email: true,
+                        push: true,
+                        marketing: false
+                      },
+                      visibility: 'public'
+                    },
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                  });
                 }
                 return true;
-            } catch (error) {
-                console.error('Error in signIn callback:', error);
-                return true; // Still allow sign in even if our user creation fails
+              } catch (error) {
+                console.error('Google sign-in error:', error);
+                return false;
+              }
             }
-        },
-        async jwt({ token, user, account, trigger }) {
-            if (trigger === "signOut") {
-                // Return null to invalidate the token completely
-                return null;
-            }
-            
-            if (account && user) {
-                token.id = user.id;
-                token.lastVerified = Date.now();
-                // Store provider info
-                token.provider = account.provider;
-                token.accessToken = account.access_token;
-            }
-            return token;
-        },
-        async session({ session, token }) {
-            if (!token) {
-                return null;
-            }
-            
-            if (session.user) {
-                session.user.id = token.id as string;
-                session.lastVerified = Date.now();
-            }
-            return session;
+            return true;
         }
-    },
+    }, 
     pages: {
         signIn: '/login',
         error: '/auth/error'

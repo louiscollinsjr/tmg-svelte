@@ -7,7 +7,11 @@ import { handleFormSession } from '$lib/server/formSession';
 
 const handleParaglide: Handle = i18n.handle();
 
-const handleAuth: Handle = async ({ event, resolve }) => {
+export const handleAuth: Handle = async ({ event, resolve }) => {
+  // Skip authentication for error routes
+  if (event.url.pathname.startsWith('/auth/error')) {
+    return await resolve(event);
+  }
     const response = await authHandler.handle({ event, resolve });
     return response;
 };
