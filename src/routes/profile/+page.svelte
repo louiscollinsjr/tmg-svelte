@@ -3,6 +3,7 @@
 	import { UserCircle, Archive, ThumbsUp, Star, ShareFat, Heart } from 'phosphor-svelte';
     import { goto } from '$app/navigation';
     import BackgroundPattern from '../components/BackgroundPattern.svelte';
+    import InitialsAvatar from '$lib/components/InitialsAvatar.svelte';
 
 	$: data = $page.data;
 	// $: console.log('Page data:', data);
@@ -25,11 +26,15 @@
 					<div class="flex items-center space-x-4">
 						<!-- User Profile Image and Info -->
 						<div class="relative pt-3">
-							<img
-								src={data.session.user.image}
-								alt={data.session.user.name}
-								class="h-16 w-16 rounded-full"
-							/>
+							{#if data.session.user.image}
+								<img
+									src={data.session.user.image}
+									alt={data.session.user.name}
+									class="h-16 w-16 rounded-full"
+								/>
+							{:else}
+								<InitialsAvatar name={data.session.user.name} size="lg" />
+							{/if}
 						</div>
 						<div>
 							<div class="mt-4">

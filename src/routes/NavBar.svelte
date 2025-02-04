@@ -6,6 +6,7 @@
     import { auth } from '$lib/stores';
     import { get } from 'svelte/store';
     import CaretDown from "phosphor-svelte/lib/CaretDown";
+    import InitialsAvatar from '$lib/components/InitialsAvatar.svelte';
     import type { Session } from '@auth/core/types';
     import { signIn, signOut } from '@auth/sveltekit/client';
     import { onMount } from 'svelte';
@@ -203,11 +204,15 @@
                                         data-menu-toggle="profile"
                                         on:click={toggleProfileMenu}
                                     >
-                                        <img
-                                            src={session.user.image ?? '/images/default-avatar.png'}
-                                            alt={session.user.name ?? 'User avatar'}
-                                            class="h-8 w-8 rounded-full"
-                                        />
+                                        {#if session.user.image}
+                                            <img
+                                                src={session.user.image}
+                                                alt={session.user.name ?? 'User avatar'}
+                                                class="h-8 w-8 rounded-full"
+                                            />
+                                        {:else}
+                                            <InitialsAvatar name={session.user.name} size="sm" />
+                                        {/if}
                                         <span class="text-sm font-medium text-gray-600 hover:text-[#ff6923]">{session.user.name ?? 'User'}</span>
                                         <CaretDown size={16} class="text-gray-600 hover:text-[#ff6923]" />
                                     </button>
