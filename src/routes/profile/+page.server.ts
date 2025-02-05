@@ -35,14 +35,79 @@ function serializeDocument(doc: any): any {
     return doc;
 }
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, cookies }) => {
+    console.log('[Profile] Starting profile page load');
     try {
         const session = await locals.auth();
-        // console.log('Session:', session);
+        console.log('[Profile] Session:', session);
         
         if (!session?.user) {
-            // console.log('No session user, redirecting');
-            throw redirect(302, '/');
+            console.log('[Profile] No session, redirecting to login');
+            throw redirect(303, '/login');
+        }
+
+        // Check for saved project data
+        const savedData = cookies.get('tempFormData');
+        console.log('[Profile] Saved cookie data:', savedData);
+
+        if (savedData) {
+            try {
+                console.log('[Profile] Processing saved project data');
+                const formData = JSON.parse(decodeURIComponent(savedData));
+                console.log('[Profile] Parsed form data:', formData);
+                
+                // Connect to DB
+                console.log('[Profile] Connecting to database');
+                await connectDB();
+                const Project = getProjectModel();
+                const User = getUserModel();
+
+                // Find the user
+                console.log('[Profile] Finding user with email:', session.user.email);
+                const userData = await User.findOne({
+                    email: session.user.email
+                });
+
+                if (!userData) {
+                    console.error('[Profile] User not found in database');
+                    cookies.delete('tempFormData', { path: '/' });
+                    return {
+                        session,
+                        error: 'User not found'
+                    };
+                }
+
+                console.log('[Profile] Found user:', userData._id);
+
+                // Create the project
+                console.log('[Profile] Creating new project');
+                const project = new Project({
+                    ...formData,
+                    contractor: userData._id,
+                    client: userData._id,
+                    status: 'pending',
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+
+                console.log('[Profile] Saving project:', project);
+                await project.save();
+                console.log('[Profile] Project saved successfully:', project._id);
+
+                // Clear the saved data
+                cookies.delete('tempFormData', { path: '/' });
+                console.log('[Profile] Cleared saved project data');
+
+                // Redirect to success page
+                throw redirect(303, '/project/success');
+            } catch (error) {
+                console.error('[Profile] Error processing project:', error);
+                cookies.delete('tempFormData', { path: '/' });
+                return {
+                    session,
+                    error: error instanceof Error ? error.message : 'Unknown error occurred'
+                };
+            }
         }
 
         await connectDB();
@@ -53,7 +118,6 @@ export const load: PageServerLoad = async ({ locals }) => {
         // Try finding by _id first
         let userData = null;
         if (session.user.id) {
-            // console.log('Looking for user with _id:', session.user.id);
             try {
                 userData = await User.findById(session.user.id).lean();
             } catch (e) {
@@ -63,12 +127,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 
         // If not found by _id, try email
         if (!userData && session.user.email) {
-            // console.log('Looking for user with email:', session.user.email);
             userData = await User.findOne({ email: session.user.email }).lean();
         }
 
         if (!userData) {
-            // console.log('No user data found');
             return {
                 session,
                 userData: null,
@@ -124,7 +186,7 @@ export const load: PageServerLoad = async ({ locals }) => {
             reviews: serializeDocument(enrichedReviews)
         };
     } catch (error) {
-        console.error('Error in profile load function:', error);
+        console.error('[Profile] Error in profile load function:', error);
         throw error;
     }
 };

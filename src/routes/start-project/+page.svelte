@@ -9,6 +9,7 @@
     import { steps } from './schema';
     import { browser } from '$app/environment';
     import { onMount, onDestroy } from 'svelte';
+    import { signIn } from '@auth/sveltekit/client';
 
 	export let data;
 
@@ -110,46 +111,68 @@
 	const { form, errors, message, enhance, validateForm, options, reset } = superForm(data.form, {
 		dataType: 'json',
 		async onSubmit({ cancel, submitter }) {
-			//console.log('onSubmit triggered');
+			console.log('[StartProject] Form submission started');
+			const user = $page.data.session?.user;
+			console.log('[StartProject] User authenticated:', user ? 'yes' : 'no');
+			
+			// Check authentication first
+			if (!user) {
+				console.log('[StartProject] User not authenticated, saving form data');
+				// Save form data temporarily in a cookie
+				if (browser) {
+					const formData = JSON.stringify($form);
+					console.log('[StartProject] Form data to save:', formData);
+					
+					// Set cookie with proper attributes
+					const cookieValue = encodeURIComponent(formData);
+					document.cookie = `tempFormData=${cookieValue}; path=/; max-age=3600; samesite=lax`;
+					
+					// Verify cookie was set
+					console.log('[StartProject] Current cookies:', document.cookie);
+					const savedCookie = document.cookie.match(/tempFormData=([^;]*)/);
+					console.log('[StartProject] Saved cookie found:', savedCookie ? 'yes' : 'no');
+				}
+				
+				// Use Auth.js signIn function
+				console.log('[StartProject] Redirecting to sign in');
+				await signIn('google', {
+					callbackUrl: '/profile'
+				});
+				cancel();
+				return;
+			}
 
-			// Validate the current step
+			console.log('[StartProject] User is authenticated, validating form');
+			// If user is authenticated, proceed with normal form validation
 			const result = await validateForm();
-			//console.log('Validation result:', result);
 
 			if (!result.valid) {
-				//console.log('Form is invalid');
+				console.log('[StartProject] Form validation failed');
 				cancel();
 				return;
 			}
 
 			if (step < totalSteps) {
-				// Proceed to the next step for intermediate steps
-				//console.log('Form is valid, calling nextStep()');
+				console.log('[StartProject] Moving to next step');
 				nextStep();
 				cancel();
-			} else {
-				// On the last step, allow form submission
-				//console.log('Last step, submitting form');
 			}
+			// On last step, allow form submission to proceed
+			console.log('[StartProject] Form submission proceeding');
 		},
 		async onResult({ result }) {
-			//console.log('Form submission result:', result);
-			// Only show errors for non-redirect failures
+			console.log('[StartProject] Form submission result:', result.type);
 			if (result.type === 'success') {
-				// Reset the form
 				reset();
 				step = 1;
-				// Navigate to success page on successful submission
 				if (browser) {
 					await goto('/project/success', { replaceState: true });
 				}
 			} else if (result.type === 'failure' && result.status !== 303) {
-				console.error('Form submission failed:', result.data?.form?.errors || result);
+				console.error('[StartProject] Form submission failed:', result.data?.form?.errors || result);
 			}
 		},
-		resetForm: true,
-		taintedMessage: null,
-		validators: zod(steps[step - 1])
+		resetForm: true
 	});
 
 	$: serverError = $errors?.server;
@@ -175,19 +198,65 @@
     let cleanup: (() => void) | undefined;
 
     onMount(() => {
-        if (browser) {
-            document.addEventListener('keydown', handleKeydown);
-            cleanup = () => {
-                document.removeEventListener('keydown', handleKeydown);
-            };
-        }
-    });
+		if (browser) {
+			console.log('[StartProject] Checking for saved form data on mount');
+			const match = document.cookie.match(/tempFormData=([^;]*)/);
+			const savedData = match ? match[1] : null;
+			console.log('[StartProject] Saved data found:', savedData ? 'yes' : 'no');
+			
+			if (savedData && $page.data.session?.user) {
+				console.log('[StartProject] Processing saved form data');
+				try {
+					// Parse the saved data
+					const formData = JSON.parse(decodeURIComponent(savedData));
+					console.log('[StartProject] Parsed form data:', formData);
+					
+					// Update the form with saved data
+					form.update(f => ({ ...f, ...formData }));
+					
+					// Remove the saved data
+					document.cookie = 'tempFormData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+					console.log('[StartProject] Cleared cookie data');
+					
+					// Submit the form
+					const submitButton = document.querySelector('button[type="submit"]');
+					if (submitButton) {
+						console.log('[StartProject] Triggering form submission');
+						submitButton.click();
+					} else {
+						console.error('[StartProject] Submit button not found');
+					}
+				} catch (error) {
+					console.error('[StartProject] Error processing saved form data:', error);
+				}
+			}
+
+			// Add keyboard event listener
+			document.addEventListener('keydown', handleKeydown);
+			cleanup = () => {
+				document.removeEventListener('keydown', handleKeydown);
+			};
+		}
+	});
     
     onDestroy(() => {
         if (cleanup) {
             cleanup();
         }
     });
+
+    function handleSubmit() {
+        const user = $page.data.session?.user;
+        if (!user) { // Check if user is logged in
+            // Save form data temporarily
+            document.cookie = `tempFormData=${JSON.stringify($form)}; path=/`;
+            // Redirect to login page with ref parameter
+            goto('/auth/signin?ref=start-project');
+            return;
+        }
+        // Proceed with form submission if user is logged in
+        // Your existing form submission logic here
+    }
 </script>
 
 <div class="mx-auto min-h-screen bg-gray-50 py-12 pt-72">
@@ -268,20 +337,29 @@
 				<!-- Step 2: Project Details -->
 				{#if step === 2}
 					<div class="max-w-3xl space-y-6">
-						<h2 class="font-sourceserif text-5xl font-normal text-gray-900">
-							Tell us about your project
-						</h2>
-						<p class="text-sm text-gray-500">
-							Create a brief description of the project to help us find the right expert.
-						</p>
+						<div class="space-y-4">
+							<h2 class="font-sourceserif text-5xl font-normal text-gray-900">
+								Tell us about your project
+							</h2>
+							<p class="text-sm text-gray-500">
+								Create a brief description of the project to help us find the right expert.
+							</p>
+						</div>
+
+						<!-- Hidden title field with default value -->
+						<input
+							type="hidden"
+							name="title"
+							bind:value={$form.title}
+						/>
 
 						<div>
 							<label for="project-type" class="mb-2 block text-sm font-medium text-gray-700">Project Type</label>
 							<div class="relative">
 								<select
-									name="projectTypes"
+									name="category"
 									id="project-type"
-									bind:value={$form.projectTypes}
+									bind:value={$form.category}
 									class="w-full appearance-none rounded-lg border border-gray-300 bg-[#f8f7f3] px-3 py-2 pr-12 focus:border-black focus:ring-black"
 									required
 								>
@@ -307,9 +385,9 @@
 									</svg>
 								</div>
 							</div>
-							{#if $form.projectTypes}
+							{#if $form.category}
 								{#each categories as category}
-									{#if category.id === $form.projectTypes}
+									{#if category.id === $form.category}
 										<p class="mt-1 text-sm text-gray-500">{category.description}</p>
 									{/if}
 								{/each}

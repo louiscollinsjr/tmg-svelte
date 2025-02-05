@@ -19,6 +19,22 @@ export const load: PageServerLoad = async ({ locals, url }) => {
     const savedFormData = await locals.formSession.get();
     if (savedFormData) {
         form.data = savedFormData;
+    } else {
+        form.data = {
+            title: 'New project',  // Set default title
+            description: '',
+            projectTypes: '',
+            images: [],
+            budget: 0,
+            timeline: {
+                startDate: null,
+                endDate: null,
+                completedDate: null
+            },
+            zipcode: '',
+            city: '',
+            state: ''
+        };
     }
 
     // Check if the user was redirected from signin with the 'ref' query parameter
