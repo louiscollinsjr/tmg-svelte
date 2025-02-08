@@ -133,11 +133,9 @@
 					console.log('[StartProject] Saved cookie found:', savedCookie ? 'yes' : 'no');
 				}
 				
-				// Use Auth.js signIn function
-				console.log('[StartProject] Redirecting to sign in');
-				await signIn('google', {
-					callbackUrl: '/profile'
-				});
+				// Redirect to custom signin page
+				console.log('[StartProject] Redirecting to signin page');
+				await goto('/auth/signin?redirectTo=project-save');
 				cancel();
 				return;
 			}

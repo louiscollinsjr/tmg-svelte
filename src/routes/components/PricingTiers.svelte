@@ -97,8 +97,9 @@
     let isPro = false;
     
     $: {
-        isLoggedIn = !!$page.data.session;
-        isPro = !!$page.data.session?.user?.isPro;
+        // isLoggedIn = !!$page.data.session;
+        // isPro = !!$page.data.session?.user?.isPro;
+        // userSubscription = $page.data.session?.user?.subscription || '';
     }
     
   </script>

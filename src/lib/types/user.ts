@@ -3,6 +3,7 @@ export interface User {
     name: string;
     image: string;
     isPro: boolean;
+    subscription: 'Starter Kit' | 'Pro Connect' | 'Master Craftsman' | 'Elite Contractor';
     providers: Array<{
         name: string;
         providerId: string;

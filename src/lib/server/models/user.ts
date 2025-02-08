@@ -45,6 +45,11 @@ const userSchema = new mongoose.Schema({
         enum: ['active', 'inactive', 'suspended'],
         default: 'active'
     },
+    subscription: {
+        type: String,
+        enum: ['Starter Kit', 'Pro Connect', 'Master Craftsman', 'Elite Contractor'],
+        default: 'Starter Kit'
+    },
     passwordHash: String,
     emailVerified: Date
 }, {

@@ -4,15 +4,20 @@
     import ProjectList from '../components/ProjectList.svelte';
     import { page } from '$app/state';
 
-    $: session = page.data.session;
-    $: isPro = page.data.isPro;
-    $: pendingProjects = page.data.pendingProjects;
-    $: console.log('Pending projects:', pendingProjects);
+    
+    let session = $derived(page.data.session);
+    let userData = $derived(page.data.userData);
+    console.log('Find work Session:', session, 'Find workUser data:', userData);
+
+    let pendingProjects = page.data.pendingProjects;
+   console.log('Pending projects:',page.data.pendingProjects);
+    
+    console.log('Pending projects:', pendingProjects);
 
 </script>
 
 <div class="min-h-screen py-40">
-    {#if session?.user && isPro}
+    {#if session?.user && userData.isPro}
     <div class="">
 		<div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
 			<div class="text-center">

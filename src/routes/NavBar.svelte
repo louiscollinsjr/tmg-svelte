@@ -1,6 +1,6 @@
 <!-- src/routes/NavBar.svelte -->
 <script lang="ts">
-    export let userData;
+    //export let userData;
 
     import { page } from '$app/state';
     import { enhance } from '$app/forms';
@@ -15,29 +15,29 @@
     import { fade } from 'svelte/transition';
     import { goto } from '$app/navigation';
 
+
     let isProfileMenuOpen = false;
     let isProjectMenuOpen = false;
     let menuContainer: HTMLElement;
     let menuTimeout: NodeJS.Timeout;
     let previousAuthState = false;
+    
 
-    $: session = page.data.session;
-    console.log('Navbar Session:', session);
-    $: userData = page.data.userData;
-    console.log('Navbar UserData:', userData);
+   let session = $derived(page.data.session);
+   let userData = $derived(page.data.userData);
 
     // Log only when auth state changes
-    $: {
-        const currentAuthState = !!session;
-        if (import.meta.env.DEV && currentAuthState !== previousAuthState) {
-            // console.log('[NavBar] Auth State Change:', {
-            //     isAuthenticated: currentAuthState,
-            //     user: session?.user?.name,
-            //     action: currentAuthState ? 'SIGN_IN' : 'SIGN_OUT'
-            // });
-            previousAuthState = currentAuthState;
-        }
+    $effect(() => {
+    const currentAuthState = !!session;
+    if (import.meta.env.DEV && currentAuthState !== previousAuthState) {
+        previousAuthState = currentAuthState;
     }
+});
+
+    // $effect(() => {
+    //     console.log('Navbar Session:', session);
+    //     console.log('Navbar UserData:', userData);
+    // });
 
     async function handleSignOut() {
         try {
@@ -161,6 +161,7 @@
             }
         };
     });
+
 </script>
 
 <nav class="fixed top-0 w-full z-50 pb-8 px-0">
@@ -202,8 +203,8 @@
                         </a>
                         {#if userData.isPro && userData.subscription !== 'Elite Contractor'}
                         <a 
-                            href="/pricing"
-                            class="inline-flex items-center px-3 py-2 mr-4 text-sm font-medium text-black bg-[#ff4500]/10 hover:bg-opacity-90 rounded-md transition-colors"
+                            href="/find-work"
+                            class="inline-flex items-center px-4 py-2 mr-4 text-sm font-medium text-black bg-[#ff4500]/10 hover:bg-opacity-90 rounded-md transition-colors"
                         >
                             Go Pro+
                         </a>

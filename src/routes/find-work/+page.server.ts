@@ -4,6 +4,11 @@ import { getProjectModel } from '$lib/server/models/project';
 import { connectDB } from '$lib/server/db';
 import { error } from '@sveltejs/kit';
 import mongoose from 'mongoose';
+import { page } from '$app/state';
+
+console.log('Find work Page data:', page.data);
+let userData = page.data.userData;
+let session = page.data.session;
 
 function toJSON(obj: any): any {
     if (obj === null || obj === undefined) {
@@ -42,13 +47,13 @@ export const load: PageServerLoad = async ({ locals }) => {
     if (session?.user) {
         try {
             await connectDB();
-            const User = getUserModel();
+            //const User = getUserModel();
             const Project = getProjectModel();
             
-            const userData = await User.findById(session.user.id).lean();
-            isPro = userData?.isPro || false;
+            // const userData = await User.findById(session.user.id).lean();
+            // isPro = userData?.isPro || false;
 
-            if (isPro) {
+            if (userData?.isPro) {
                 console.log('User is pro, fetching pending projects...');
                 
                 // First check if we have any projects at all
