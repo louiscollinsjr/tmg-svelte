@@ -35,6 +35,7 @@ function toJSON(obj: any): any {
 
 export const load: PageServerLoad = async ({ locals }) => {
     const session = await locals.auth();
+    console.log('Session in find work load:', session);
     let isPro = false;
     let pendingProjects = [];
 

@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	//import { page } from '$app/stores';
+	import {page} from '$app/state';
 	import { UserCircle, Archive, ThumbsUp, Star, ShareFat, Heart } from 'phosphor-svelte';
     import { goto } from '$app/navigation';
     import BackgroundPattern from '../components/BackgroundPattern.svelte';
     import InitialsAvatar from '$lib/components/InitialsAvatar.svelte';
 
-	$: data = $page.data;
+	$: data = page.data;
 	// $: console.log('Page data:', data);
 
 	function formatDate(dateStr: string) {

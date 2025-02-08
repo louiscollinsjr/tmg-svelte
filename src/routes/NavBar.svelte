@@ -1,6 +1,8 @@
 <!-- src/routes/NavBar.svelte -->
 <script lang="ts">
-    import { page } from '$app/stores';
+    export let userData;
+
+    import { page } from '$app/state';
     import { enhance } from '$app/forms';
     import { invalidateAll } from '$app/navigation';
     import { auth } from '$lib/stores';
@@ -19,7 +21,10 @@
     let menuTimeout: NodeJS.Timeout;
     let previousAuthState = false;
 
-    $: session = $page.data.session;
+    $: session = page.data.session;
+    console.log('Navbar Session:', session);
+    $: userData = page.data.userData;
+    console.log('Navbar UserData:', userData);
 
     // Log only when auth state changes
     $: {
@@ -195,9 +200,17 @@
                         <a href="/help-center" class="text-sm text-gray-600 hover:text-[#ff6923] transition-colors">
                             Help Center
                         </a>
-                        <div class="ml-auto text-sm text-gray-600 hover:text-[#ff6923] transition-colors">
+                        {#if userData.isPro && userData.subscription !== 'Elite Contractor'}
+                        <a 
+                            href="/pricing"
+                            class="inline-flex items-center px-3 py-2 mr-4 text-sm font-medium text-black bg-[#ff4500]/10 hover:bg-opacity-90 rounded-md transition-colors"
+                        >
+                            Go Pro+
+                        </a>
+                    {/if} 
+                        <div class=" ml-auto text-sm text-gray-600 hover:text-[#ff6923] transition-colors">
                             {#if session && session.user}
-                                <div class="relative">
+                                <div class="relative inline-block">
                                     <button 
                                         type="button"
                                         class="flex items-center space-x-2 focus:outline-none"
@@ -208,13 +221,14 @@
                                             <img
                                                 src={session.user.image}
                                                 alt={session.user.name ?? 'User avatar'}
-                                                class="h-8 w-8 rounded-full"
+                                                class="h-12 w-12 rounded-full"
                                             />
                                         {:else}
                                             <InitialsAvatar name={session.user.name} size="sm" />
                                         {/if}
-                                        <span class="text-sm font-medium text-gray-600 hover:text-[#ff6923]">{session.user.name ?? 'User'}</span>
-                                        <CaretDown size={16} class="text-gray-600 hover:text-[#ff6923]" />
+                                        <!-- <span class="text-sm font-medium text-gray-600 hover:text-[#ff6923]">{session.user.name ?? 'User'}</span> -->
+                                        <!-- <CaretDown size={16} class="text-gray-600 hover:text-[#ff6923]" /> -->
+                                        <span class="absolute bottom-1 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full"></span>
                                     </button>
 
                                     {#if isProfileMenuOpen}

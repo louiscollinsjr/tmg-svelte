@@ -2,12 +2,13 @@
 <script lang="ts">
     import PricingTiers from '../components/PricingTiers.svelte';
     import ProjectList from '../components/ProjectList.svelte';
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
 
-    $: session = $page.data.session;
-    $: isPro = $page.data.isPro;
-    $: pendingProjects = $page.data.pendingProjects;
+    $: session = page.data.session;
+    $: isPro = page.data.isPro;
+    $: pendingProjects = page.data.pendingProjects;
     $: console.log('Pending projects:', pendingProjects);
+
 </script>
 
 <div class="min-h-screen py-40">

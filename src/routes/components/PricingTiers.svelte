@@ -14,6 +14,8 @@
       description: string;
       features: PricingFeature[];
       highlight?: boolean;
+      cta: string;
+      upgradeCta: string;
     }
     
       const pricingTiers: PricingTier[] = [
@@ -22,14 +24,16 @@
           price: 0,
           description: 'Essential tools to kickstart your business',
           features: [
-          { name: 'Personal or Business Profile (1 Service Type)', included: true },
+          { name: 'Profile w/ 1 Service Type', included: true },
           { name: 'Brief Description', included: true },
           { name: 'Online Advertisement', included: true },
-          { name: 'Project Images', included: false },
-          { name: 'Website', included: false },
-          { name: 'Email Service', included: false },
-          { name: 'Booking Calendar', included: false },
+          // { name: 'Project Images', included: false },
+          // { name: 'Website', included: false },
+          // { name: 'Email Service', included: false },
+          // { name: 'Booking Calendar', included: false },
           ],
+          cta: 'Get Started',
+          upgradeCta: 'Current',
       },
       {
           name: 'Pro Connect',
@@ -43,9 +47,11 @@
           { name: 'Brief Description', included: true },
           { name: 'Online Advertisement', included: true },
           { name: '6 Project Images', included: true },
-          { name: 'Email Service', included: false },
-          { name: 'Booking Calendar', included: false },
+          // { name: 'Email Service', included: false },
+          // { name: 'Booking Calendar', included: false },
           ],
+          cta: 'Join Pro Connect Yearly',
+          upgradeCta: 'Current',
       },
       {
           name: 'Master Craftsman',
@@ -59,8 +65,10 @@
           { name: 'Online Advertisement', included: true },
           { name: '12 Project Images', included: true },
           { name: 'Email Service', included: true },
-          { name: 'Booking Calendar', included: false },
+          // { name: 'Booking Calendar', included: false },
           ],
+          cta: 'Join Pro Connect Yearly',
+          upgradeCta: 'Current',
       },
       {
           name: 'Elite Contractor',
@@ -76,62 +84,69 @@
           { name: 'Email Service', included: true },
           { name: 'Booking Calendar', included: true },
           ],
+          cta: 'Join Elite Contractor Yearly',
+          upgradeCta: 'Join Elite Contractor Yearly',
       },
       ];
     let isModalOpen = false;
+    let selectedTier: PricingTier | null = null;
+    
+    // Add these to track user status
+    import { page } from '$app/stores';
+    let isLoggedIn = false;
+    let isPro = false;
+    
+    $: {
+        isLoggedIn = !!$page.data.session;
+        isPro = !!$page.data.session?.user?.isPro;
+    }
     
   </script>
   
  
   <div class="">
-      <div class="mx-auto max-w-screen-7xl px-6 lg:px-8 pb-32">
-        <!-- <div class="mx-auto ~max-w-screen-4xl/7xl text-center">
-          <h2 class="~text-5xl/7xl md:~text-6xl/9xl font-bold tracking-tight text-slate-800">
-              Pricing
-          </h2>
-          <p class="~mt-6/16 ~text-lg/2xl leading-8 text-gray-600">
-              Choose the perfect plan for your business needs
-          </p>
-        </div> -->
-        <div class="isolate mx-auto mt-16 grid w-full grid-cols-1 gap-y-8 sm:max-w-xl md:max-w-3xl lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:gap-x-4 xl:gap-x-4">
+      <div class="mx-auto max-w-screen-7xl px-2 pb-32">
+        <div class="isolate mx-auto mt-16 grid w-full grid-cols-1 md:grid-cols-4 lg:gap-x-4 xl:gap-x-4">
           {#each pricingTiers as tier}
               <div
-               class={`rounded-3xl p-8 ring-1 ring-gray-200 ${
+               class={`rounded-3xl px-6 py-8 ring-1 ring-gray-200 ${
                  tier.highlight
                    ? 'bg-white shadow-xl ring-2 ring-burnt-orange'
                    : 'bg-white/60'
                }`}
               >
-              <h3 class="~text-lg/4xl font-semibold leading-8 text-gray-900">
+              <h3 class="text-lg font-semibold leading-8 text-gray-900 h-10 flex items-center">
                  {tier.name}
               </h3>
-              <p class="mt-4 ~text-sm/2xl leading-6 text-gray-600">
-                 {tier.description}
-               </p>
-              <p class="mt-6 flex items-baseline gap-x-1">
-                <span class="text-4xl font-bold tracking-tight text-gray-900">
-                    ${tier.price}
+            
+              <p class="mt-3 flex items-baseline gap-x-1">
+                <span class="text-3xl font-bold tracking-tight text-gray-900">
+                    <span class="text-base mr-1">$</span>{tier.price}
                   </span>
-                   <span class="~text-sm/4xl font-semibold leading-6 text-gray-600">
-                     /year
+                   <span class="text-sm leading-6 text-gray-600">
+                     per year
                   </span>
               </p>
+              <p class="mt-3 text-xs leading-4 text-gray-600 h-8 w-48">
+                {tier.description}
+              </p>
+
                <button
-                  
-                   class={` text-sm mt-6 block w-fit rounded-full px-3 py-2 ~text-base/2xl md:~text-2xl/3xl font-medium leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 font-roboto ${
+                   class={`text-sm mt-8 block w-full rounded-lg px-3 py-2 font-medium leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 font-roboto ${
                      tier.highlight
                         ? 'bg-[#ff4500] text-white hover:bg-opacity-90'
                          : 'bg-zinc-200 text-slate-800 hover:bg-zinc-300'
                     }`}
                >
-                   Get started
+                  {isLoggedIn && ((isPro && tier.price > 0) || (!isPro && tier.price === 0)) ? tier.upgradeCta : tier.cta}
                 </button>
-              <ul class="mt-8 space-y-3 text-sm leading-6 text-gray-600">
+                <div class="w-full h-px bg-gray-200 my-6"></div>
+              <ul class="space-y-1 text-xs leading-6 text-gray-600">
                   {#each tier.features as feature (feature.name)}
                       <li class="flex gap-x-3">
                           {#if feature.included}
                               <svg
-                              class="h-6 w-5 flex-none text-burnt-orange"
+                              class="h-6 w-3 flex-none text-green-500"
                              viewBox="0 0 20 20"
                               fill="currentColor"
                               >
@@ -143,7 +158,7 @@
                               </svg>
                           {:else}
                               <svg
-                                 class="h-6 w-5 flex-none text-gray-400"
+                                 class="h-6 w-3 flex-none text-gray-400"
                               viewBox="0 0 20 20"
                                  fill="currentColor"
                                   >
