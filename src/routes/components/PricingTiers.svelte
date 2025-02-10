@@ -96,6 +96,8 @@
     let isLoggedIn = false;
     let isPro = false;
     export let userSubscription;
+    let isPricingRoute = $page.url.pathname === '/pricing';
+
     $: {
         // isLoggedIn = !!$page.data.session;
         // isPro = !!$page.data.session?.user?.isPro;
@@ -107,12 +109,12 @@
   
  
   <div class="">
-      <div class="mx-auto max-w-screen-7xl px-2 pb-32 pt-1">
+      <div class="mx-auto max-w-screen-8xl px-2 pb-32 pt-1">
         <div class="isolate mx-auto mt-16 grid w-full grid-cols-1 md:grid-cols-4 gap-x-6">
           {#each pricingTiers as tier}
               <div
                class={`rounded-3xl px-6 py-8 ring-1 ring-gray-200 ${
-                 tier.highlight
+                 tier.highlight && !isPricingRoute
                    ? 'relative overflow-visible rounded-3xl shadow-xl ring-0 ring-gray-300 before:absolute before:-inset-4 before:blur-[25px] before:bg-gradient-to-br before:from-green-400/15 before:via-teal-600/15 before:to-orange-400/15 before:-z-50 after:absolute after:inset-0 after:bg-[#f8f7f3] after:-z-40 after:rounded-3xl'
                    : 'bg-white/60'
                }`}
@@ -135,9 +137,10 @@
 
                <button
                    class={`text-sm mt-8 block w-full rounded-lg px-3 py-2 font-medium leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 font-roboto ${
-                     tier.highlight
-                        ? 'bg-[#ff4500] text-white hover:bg-opacity-90'
-                         : 'bg-zinc-200 text-slate-800 hover:bg-zinc-300'
+                     tier.name === userSubscription
+                        ? 'bg-zinc-200 text-slate-800 hover:bg-zinc-300' 
+                        : 'bg-[#ff4500] text-white hover:bg-opacity-90'
+
                     }`}
                >  {tier.name === userSubscription ? "Current Plan" : tier.upgradeCta}
                   

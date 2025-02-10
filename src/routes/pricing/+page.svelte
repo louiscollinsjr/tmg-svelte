@@ -11,7 +11,7 @@
 
 <!-- {/* Hero Section */} -->
 <div class="pt-40">
-    <BackgroundPattern opacity="0.05" patternClassName="bg-orange-50/20" />
+    <BackgroundPattern opacity="0.08" patternClassName="bg-orange-50/20" />
     <!-- <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <div class="text-center">
             <h1

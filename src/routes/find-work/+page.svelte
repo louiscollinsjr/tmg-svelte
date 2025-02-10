@@ -5,6 +5,7 @@
 
     import { onMount } from 'svelte';
     import type { PageData } from './$types';
+	import BackgroundPattern from '../components/BackgroundPattern.svelte';
 
     export let data: PageData;
     let { userData, session, pendingProjects } = data;
@@ -22,11 +23,48 @@
 
     console.log('Pending projects:', pendingProjects);
 
-</script>
 
-<div class="min-h-screen py-40">
+    const benefits = [
+    {
+        title: "Present yourself and your work in a more compelling way.",
+        subtitle: "Get matched with projects that align with your skills and schedule.",
+        image: "", 
+        flexColReverse: true,
+        // cta: "Learn More",
+        // ctaLink: "/learn-more/easy-job-matching"
+    },
+    {
+        title: "Steady Work",
+        subtitle: "Enjoy a steady flow of job opportunities—no client searching needed.",
+        image: "", // Replace with actual image path
+        flexColReverse: false,
+        // cta: "Explore Opportunities",
+        // ctaLink: "/learn-more/steady-work"
+    },
+    {
+        title: "Direct Connections",
+        subtitle: "Communicate easily with homeowners to ask questions and build trust.",
+        image: "", // Replace with actual image path
+        flexColReverse: true,
+        // cta: "Connect Now",
+        // ctaLink: "/learn-more/direct-connections"
+    },
+    {
+        title: "Expand Your Network",
+        subtitle: "Connect with homeowners and professionals to unlock new opportunities.",
+        image: "", // Replace with actual image path
+        flexColReverse: false,
+        cta: "Join Us",
+        ctaLink: "/learn-more/expand-network"
+    }
+];
+
+</script>
+<BackgroundPattern opacity="0.05" patternClassName="bg-[#ffffff]/100" />
+<div class="relative z-10 min-h-screen py-40">
+   
     {#if session?.user && userData?.isPro}
-    <div class="">
+    <div class="relative z-10">
 		<div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
 			<div class="text-center">
 				<h1
@@ -62,6 +100,7 @@
 
 	<!-- {/* Hero Section */} -->
 	<div class="">
+      
 		<div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
 			<div class="text-center">
 				<h1
@@ -80,62 +119,73 @@
 		</div>
 	</div>
 
-    <section class="py-16">
-        <div class="mt-12 max-w-5xl mx-auto">
-            <h2 class="text-4xl font-bold text-gray-900 text-center mb-8 font-sourceserif">How It Works</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                    <span class="font-semibold text-gray-800">1. Sign Up</span>
-                     <p class="mt-2 text-gray-600">Create your free profile and set your preferred service area.</p>
+    <section class="py-16 pb-32">
+        <div class="mt-12 max-w-7xl mx-auto">
+            <!-- <h2 class="text-4xl font-bold text-gray-900 text-center mb-8 font-sourceserif">How It Works</h2> -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-8">
+                <div class="bg-white border border-light-gray rounded-2xl p-12 text-center">
+                    <img src="/images/howItWorks/Frame143.jpg" alt="Sign Up" class="mx-auto mb-2 w-48 h-48 grayscale" />
+                    <span class="font-semibold text-gray-800 text-2xl">Sign Up</span>
+                    <p class="mt-2 text-gray-600 font-opensans">Create your free profile and set your preferred service area.</p>
                 </div>
-                  <div>
-                    <span class="font-semibold text-gray-800">2. Set up Your Profile</span>
-                     <p class="mt-2 text-gray-600">Setup your profile with specific types of work that you do.</p>
+                <div class="bg-white border border-light-gray rounded-2xl p-12 text-center">
+                    <img src="/images/howItWorks/Frame144.jpg" alt="Set up Your Profile" class="mx-auto mb-2 mt-5 w-48 h-48 grayscale" />
+                    <span class="font-semibold text-gray-800 text-2xl">Set up Your Profile</span>
+                    <p class="mt-2 text-gray-600 font-opensans">Setup your profile with specific types of work that you do.</p>
                 </div>
-                 <div>
-                    <span class="font-semibold text-gray-800">3. Get Contacted</span>
-                    <p class="mt-2 text-gray-600">Start getting matched with the perfect jobs, and contact homeowners.</p>
+                <div class="bg-white border border-light-gray rounded-2xl p-12 text-center">
+                    <img src="/images/howItWorks/Frame145.jpg" alt="Get Contacted" class="mx-auto mb-2 mt-5 w-48 h-48 grayscale" />
+                    <span class="font-semibold text-gray-800 text-2xl">Get Connected</span>
+                    <p class="mt-2 text-gray-600 font-opensans">Start getting matched with the perfect jobs, and contact homeowners.</p>
                 </div>
             </div>
           </div>
     </section>
 
-    <section class="py-16">
-        <div class="mt-12  max-w-5xl mx-auto">
-            <h2 class="text-4xl font-bold text-gray-900 text-center mb-8 font-sourceserif">Benefits of Joining TryMyGuys</h2>
-            <ul class="list-none space-y-4">
-            <li class="text-gray-600">  ✓ Expand your customer base with access to local homeowners.
-            </li>
-               <li class="text-gray-600"> ✓  Find projects that fit your skill set and expertise.
-            </li>
-               <li class="text-gray-600"> ✓ Use our platform tools to manage your schedule and your projects.
-           </li>
-                 <li class="text-gray-600"> ✓  Build your business reputation by showcasing your project portfolio.
-            </li>
-                 <li class="text-gray-600">✓  Control your own work schedule and availability.
-            </li>
-          </ul>
+
+    <section class="py-32">
+        <div class="mt-12 max-w-7xl mx-auto">
+            {#each benefits as benefit}
+            <div class={`flex flex-rowmx-auto mb-16 px-4 py-8 gap-20 items-center ${benefit.flexColReverse ? 'flex-row-reverse' : ''}`}>
+                <div class="text-center lg:text-left w-1/3">
+                    <h2 class="text-4xl font-bold mb-4 w-80">{benefit.title}</h2>
+                    <p class="text-gray-600 text-lg mb-6 w-96">{benefit.subtitle}</p>
+                    {#if benefit.cta}
+                    <a href={benefit.ctaLink} class="bg-[#ff5a00] text-white rounded-full py-4 font-bold px-20 text-center text-sm transition duration-300 hover:bg-gray-800">
+                        {benefit.cta}
+                    </a>
+                    {/if}
+                </div>
+                <div class="relative bg-gray-100 w-2/3 h-[400px] rounded-xl">
+                    {#if benefit.image !== ""}
+                    <img src={benefit.image} alt={benefit.title} class="w-full h-auto rounded-lg shadow-lg" />
+                    {/if}
+                </div>
+            </div>
+        {/each}
         </div>
     </section>
 
-    <section class="pt-16">
+    
+    <section class="pt-16 ">
         <div class="mt-12 text-center">
-            <p class="text-4xl font-extrabold sm:text-4xl text-[#ff5a00] font-sourceserif">Ready to grow your business?</p> 
+            <p class="text-4xl font-extrabold sm:text-6xl text-[#ff5a00]  font-sourceserif pb-4">Ready to grow your business?</p> 
             <p class="text-4xl font-extrabold text-gray-900 sm:text-4xl font-sourceserif"> Choose the plan that is right for you!</p>
          </div>
-    </section>
+    
 
 	<!-- {/* Pricing Section */} -->
-	<div class="bg-gray-50">
+	<div class="">
 		<div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
 			<div class="text-center">
 				<!-- <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">Choose your plan</h2> -->
-				<p class="mt-4 text-lg text-gray-600">Select the perfect plan for your business needs</p>
+				<p class="mt-4 text-lg text-gray-800 z-1000">Select the perfect plan for your business needs</p>
 			</div>
 			<div class="mt-16">
 				<PricingTiers userSubscription={userData?.subscription} />
 			</div>
 		</div>
 	</div>
+</section>
     {/if}
 </div>
