@@ -1,41 +1,82 @@
-import { redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { redirect, fail } from '@sveltejs/kit';
+import type { PageServerLoad, Actions } from './$types';
 import { connectDB } from '$lib/server/db';
 import mongoose from 'mongoose';
-import { getUserModel } from '$lib/server/models/user';
 import { getProjectModel } from '$lib/server/models/project';
 import { getReviewModel } from '$lib/server/models/review';
 
 // Helper function to serialize Mongoose documents
 function serializeDocument(doc: any): any {
-    if (!doc) return doc;
+	if (!doc) return doc;
 
-    // Handle arrays
-    if (Array.isArray(doc)) {
-        return doc.map(item => serializeDocument(item));
-    }
+	// Handle arrays
+	if (Array.isArray(doc)) {
+		return doc.map(item => serializeDocument(item));
+	}
 
-    // Handle objects
-    if (typeof doc === 'object') {
-        const serialized: any = {};
-        for (const [key, value] of Object.entries(doc)) {
-            if (value instanceof mongoose.Types.ObjectId) {
-                serialized[key] = value.toString();
-            } else if (value instanceof Date) {
-                serialized[key] = value.toISOString();
-            } else if (typeof value === 'object' && value !== null) {
-                serialized[key] = serializeDocument(value);
-            } else {
-                serialized[key] = value;
-            }
-        }
-        return serialized;
-    }
+	if (typeof doc === 'object') {
+		const serialized: any = {};
+		for (const [key, value] of Object.entries(doc)) {
+			if (value instanceof mongoose.Types.ObjectId) {
+				serialized[key] = value.toString();
+			} else if (value instanceof Date) {
+				serialized[key] = value.toISOString();
+			} else if (typeof value === 'object' && value !== null) {
+				serialized[key] = serializeDocument(value);
+			} else {
+				serialized[key] = value;
+			}
+		}
+		return serialized;
+	}
 
-    return doc;
+	return doc;
 }
 
-export const load: PageServerLoad = async ({ locals, cookies }) => {
+export const actions: Actions = {
+    archiveProject: async ({ request }) => {
+        try {
+            const data = await request.formData();
+            const projectId = data.get('projectId');
+            console.log('Received projectId:', projectId);
+            
+            if (!projectId) {
+                return fail(400, { 
+                    success: false, 
+                    message: 'Project ID is required' 
+                });
+            }
+
+            const Project = getProjectModel();
+            const project = await Project.findByIdAndUpdate(
+                projectId,
+                { status: 'archived' },
+                { new: true }
+            );
+
+            if (!project) {
+                return fail(404, { 
+                    success: false, 
+                    message: 'Project not found' 
+                });
+            }
+
+            return {
+                type: 'success',
+                status: 200,
+                data: { project: serializeDocument(project) }
+            };
+        } catch (error) {
+            console.error('[Profile] Error archiving project:', error);
+            return fail(500, { 
+                success: false, 
+                message: 'Failed to archive project' 
+            });
+        }
+    }
+};
+
+export const load: PageServerLoad = async ({ locals, cookies, parent }) => {
     console.log('[Profile] Starting profile page load');
     try {
         const session = await locals.auth();
@@ -46,6 +87,9 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
             throw redirect(303, '/login');
         }
 
+        // Access layout data using parent()
+        const { userData } = await parent();
+
         // Check for saved project data
         const savedData = cookies.get('tempFormData');
         console.log('[Profile] Saved cookie data:', savedData);
@@ -55,29 +99,11 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
                 console.log('[Profile] Processing saved project data');
                 const formData = JSON.parse(decodeURIComponent(savedData));
                 console.log('[Profile] Parsed form data:', formData);
-                
+
                 // Connect to DB
                 console.log('[Profile] Connecting to database');
                 await connectDB();
                 const Project = getProjectModel();
-                const User = getUserModel();
-
-                // Find the user
-                console.log('[Profile] Finding user with email:', session.user.email);
-                const userData = await User.findOne({
-                    email: session.user.email
-                });
-
-                if (!userData) {
-                    console.error('[Profile] User not found in database');
-                    cookies.delete('tempFormData', { path: '/' });
-                    return {
-                        session,
-                        error: 'User not found'
-                    };
-                }
-
-                console.log('[Profile] Found user:', userData._id);
 
                 // Create the project
                 console.log('[Profile] Creating new project');
@@ -105,46 +131,26 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
                 cookies.delete('tempFormData', { path: '/' });
                 return {
                     session,
+                    userData, // Pass userData to the component
+                    projects: [],
+                    reviews: [],
                     error: error instanceof Error ? error.message : 'Unknown error occurred'
                 };
             }
         }
 
+        // Connect to DB only if not already connected
         await connectDB();
-        const User = getUserModel();
         const Project = getProjectModel();
         const Review = getReviewModel();
-        
-        // Try finding by _id first
-        let userData = null;
-        if (session.user.id) {
-            try {
-                userData = await User.findById(session.user.id).lean();
-            } catch (e) {
-                console.error('Error finding user by _id:', e);
-            }
-        }
-
-        // If not found by _id, try email
-        if (!userData && session.user.email) {
-            userData = await User.findOne({ email: session.user.email }).lean();
-        }
-
-        if (!userData) {
-            return {
-                session,
-                userData: null,
-                projects: [],
-                reviews: []
-            };
-        }
 
         // Fetch user's projects
         const projects = await Project.find({ 
             $or: [
                 { client: new mongoose.Types.ObjectId(userData._id) },
                 { owner: new mongoose.Types.ObjectId(userData._id) }
-            ]
+            ],
+            status: { $ne: 'archived' } // Filter out archived projects
         }).lean();
 
         // Fetch reviews where the user is either the owner or contractor
@@ -183,7 +189,8 @@ export const load: PageServerLoad = async ({ locals, cookies }) => {
             session,
             userData: serializeDocument(userData),
             projects: serializeDocument(projects),
-            reviews: serializeDocument(enrichedReviews)
+            reviews: serializeDocument(enrichedReviews),
+            error: null // Clear any previous error
         };
     } catch (error) {
         console.error('[Profile] Error in profile load function:', error);

@@ -260,7 +260,7 @@
 <div class="mx-auto min-h-screen bg-gray-50 py-12 pt-72">
 	<BackgroundPattern opacity="0.08" patternClassName="bg-gray-100" />
 	<div
-		class="relative z-10 mx-auto flex min-h-[600px] max-w-5xl flex-col overflow-visible rounded-xl pb-24 shadow-xl ring-0 ring-gray-300 before:absolute before:-inset-4 before:blur-[25px] before:bg-gradient-to-br before:from-green-400/15 before:via-teal-600/15 before:to-orange-400/35 before:-z-50 after:absolute after:inset-0 after:bg-[#f8f7f3] after:-z-40 after:rounded-xl"
+		class="relative z-10 mx-auto flex min-h-[600px] max-w-5xl flex-col overflow-visible rounded-xl pb-24 shadow-xl ring-0 ring-gray-300 before:absolute before:-inset-4 before:blur-[25px] before:bg-gradient-to-br before:from-green-400/10 before:via-teal-600/10 before:to-orange-400/10 before:-z-50 after:absolute after:inset-0 after:bg-[#f8f7f3] after:-z-40 after:rounded-xl"
 	>
 		<!-- ... header and progress bar ... -->
 		 <!-- Progress bar -->

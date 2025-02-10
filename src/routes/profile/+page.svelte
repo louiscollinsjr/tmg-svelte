@@ -5,9 +5,25 @@
     import { goto } from '$app/navigation';
     import BackgroundPattern from '../components/BackgroundPattern.svelte';
     import InitialsAvatar from '$lib/components/InitialsAvatar.svelte';
+	import type { PageData } from './$types';
+    import { enhance } from '$app/forms';
+    import { invalidateAll } from '$app/navigation';
 
-	$: data = page.data;
-	// $: console.log('Page data:', data);
+	export let data: PageData;
+
+    $: ({ session, userData, projects, reviews } = data);
+
+    let archiveForm: HTMLFormElement;
+
+    function handleArchive(projectId: string) {
+        if (archiveForm) {
+            const input = archiveForm.querySelector('input[name="projectId"]') as HTMLInputElement;
+            if (input) {
+                input.value = projectId;
+                archiveForm.requestSubmit();
+            }
+        }
+    }
 
 	function formatDate(dateStr: string) {
 		return new Date(dateStr).toLocaleDateString('en-US', {
@@ -16,7 +32,26 @@
 			day: 'numeric'
 		});
 	}
+
+	console.log(`Profile page data: ${data.projects}`);
 </script>
+
+<!-- Hidden form for archiving -->
+<form
+    bind:this={archiveForm}
+    method="POST"
+    action="?/archiveProject"
+    use:enhance={() => {
+        return async ({ result }) => {
+            if (result.type === 'success') {
+                await invalidateAll();
+            }
+        };
+    }}
+    class="hidden"
+>
+    <input type="hidden" name="projectId" value="" />
+</form>
 
 <div class="min-h-screen bg-gray-50">
     <BackgroundPattern opacity="0.05" patternClassName="bg-gray-50" />
@@ -151,13 +186,14 @@
 									<button
 										class="absolute right-3 top-3 rounded-full p-1.5 transition-colors hover:bg-gray-100"
 										title="Archive project"
+										on:click={() => handleArchive(project._id)}
 									>
 										<Archive size={20} weight="duotone" />
 									</button>
 									<!-- Project Details -->
 									<div class="mb-4 flex items-start justify-between text-[#64635f]">
 										<div>
-                                            <!-- pill for projec status red yellow green -->
+                                            <!-- pill for project status red yellow green -->
 											<h3 class="mb-2 text-sm font-semibold">{project.title}</h3>
 											<p class="mb-3 line-clamp-2 text-xs text-[#64635f]">{project.description}</p>
 										</div>
