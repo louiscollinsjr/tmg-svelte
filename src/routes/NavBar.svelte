@@ -1,12 +1,4 @@
-<!-- src/routes/NavBar.svelte -->
 <script lang="ts">
-    //export let userData;
-
-    import { page } from '$app/state';
-    import { enhance } from '$app/forms';
-    import { invalidateAll } from '$app/navigation';
-    import { auth } from '$lib/stores';
-    import { get } from 'svelte/store';
     import CaretDown from "phosphor-svelte/lib/CaretDown";
     import InitialsAvatar from '$lib/components/InitialsAvatar.svelte';
     import type { Session } from '@auth/core/types';
@@ -14,30 +6,33 @@
     import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
     import { goto } from '$app/navigation';
+    import { page } from '$app/state';  // Import page for access to page.url
 
+    //  Declare props using $props()
+    interface Props {
+        userData: {
+            isPro: boolean;
+            subscription: string;
+            // Add other properties of userData here
+        };
+        session: Session | undefined | null;
+    }
+    
+    let { userData, session } = $props<Props>();
 
-    let isProfileMenuOpen = false;
-    let isProjectMenuOpen = false;
+    let isProfileMenuOpen = $state(false);
+    let isProjectMenuOpen = $state(false);
     let menuContainer: HTMLElement;
     let menuTimeout: NodeJS.Timeout;
     let previousAuthState = false;
-    
-
-   let session = $derived(page.data.session);
-   let userData = $derived(page.data.userData);
 
     // Log only when auth state changes
     $effect(() => {
-    const currentAuthState = !!session;
-    if (import.meta.env.DEV && currentAuthState !== previousAuthState) {
-        previousAuthState = currentAuthState;
-    }
-});
-
-    // $effect(() => {
-    //     console.log('Navbar Session:', session);
-    //     console.log('Navbar UserData:', userData);
-    // });
+        const currentAuthState = !!session;
+        if (import.meta.env.DEV && currentAuthState !== previousAuthState) {
+            previousAuthState = currentAuthState;
+        }
+    });
 
     async function handleSignOut() {
         try {
@@ -47,13 +42,13 @@
             // Clear all auth-related cookies first
             document.cookie.split(';').forEach(cookie => {
                 const [name] = cookie.split('=').map(c => c.trim());
-                if (name.startsWith('next-auth.session-token') ||  
-                    name.includes('auth.session') ){
+                if (name.startsWith('next-auth.session-token') ||
+                    name.includes('auth.session')) {
                     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
                     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/auth`;
                 }
             });
-            
+
             // Clear localStorage and sessionStorage
             ['next-auth.session-token', 'auth.session'].forEach(key => {
                 localStorage.removeItem(key);
@@ -62,11 +57,8 @@
                 sessionStorage.removeItem(`${key}.state`);
             });
 
-            // Clear auth store
-            auth.set(null);
-
             // Sign out from the app
-            await signOut({ 
+            await signOut({
                 callbackUrl: '/'
             });
 
@@ -102,7 +94,7 @@
             // Clear auth store
             auth.set(null);
 
-            await signIn('google', { 
+            await signIn('google', {
                 callbackUrl: window.location.pathname,
                 prompt: 'select_account'
             });
@@ -123,24 +115,23 @@
     }
 
     function toggleProfileMenu(event: MouseEvent) {
+        console.log('Toggle Profile Menu Clicked');
         event.stopPropagation();
         isProfileMenuOpen = !isProfileMenuOpen;
+        console.log('isProfileMenuOpen:', isProfileMenuOpen);
         isProjectMenuOpen = false;
     }
 
-    function handleMouseEnter(menu: 'profile' | 'project') {
+    function handleMouseEnter(event: MouseEvent) {
         if (menuTimeout) {
             clearTimeout(menuTimeout);
         }
     }
 
-    function handleMouseLeave(menu: 'profile' | 'project') {
+    function handleMouseLeave(event: MouseEvent) {
         menuTimeout = setTimeout(() => {
-            if (menu === 'profile') {
-                isProfileMenuOpen = false;
-            } else {
-                isProjectMenuOpen = false;
-            }
+            isProfileMenuOpen = false;
+            isProjectMenuOpen = false;
         }, 200);
     }
 
@@ -186,9 +177,9 @@
                         <a href="/explore-designs" class="text-sm text-gray-600 hover:text-[#ff6923] transition-colors">
                             Explore Designs
                         </a>
-                        
+
                         <div class="relative">
-                          
+
                             <a href="/start-project" class="text-sm text-gray-600 hover:text-[#ff6923] transition-colors">
                                 Start a project
                             </a>
@@ -201,22 +192,22 @@
                         <a href="/help-center" class="text-sm text-gray-600 hover:text-[#ff6923] transition-colors">
                             Help Center
                         </a>
-                        {#if userData.isPro && userData.subscription !== 'Elite Contractor'}
-                        <a 
-                            href="/find-work"
+                        {#if userData && userData.isPro && userData.subscription !== 'Elite Contractor'}
+                        <a
+                            href="/pricing"
                             class="inline-flex items-center px-4 py-2 mr-4 text-sm font-medium text-black bg-[#ff4500]/10 hover:bg-opacity-90 rounded-md transition-colors"
                         >
                             Go Pro+
                         </a>
-                    {/if} 
+                    {/if}
                         <div class=" ml-auto text-sm text-gray-600 hover:text-[#ff6923] transition-colors">
                             {#if session && session.user}
                                 <div class="relative inline-block">
-                                    <button 
+                                    <button
                                         type="button"
                                         class="flex items-center space-x-2 focus:outline-none"
                                         data-menu-toggle="profile"
-                                        on:click={toggleProfileMenu}
+                                        onclick={toggleProfileMenu}
                                     >
                                         {#if session.user.image}
                                             <img
@@ -233,38 +224,24 @@
                                     </button>
 
                                     {#if isProfileMenuOpen}
-                                        <div
-                                            bind:this={menuContainer}
-                                            class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                                            role="menu"
-                                            aria-orientation="vertical"
-                                            aria-labelledby="user-menu-button"
-                                            tabindex="-1"
-                                            transition:fade={{ duration: 100 }}
-                                            on:mouseenter={() => handleMouseEnter('profile')}
-                                            on:mouseleave={() => handleMouseLeave('profile')}
+                                        <div transition:fade class="absolute right-0 mt-2 w-48 rounded-md shadow-xl z-10 bg-white ring-1 ring-black ring-opacity-5 z-[1000]"
+                                            onmouseenter={handleMouseEnter}
+                                            onmouseleave={handleMouseLeave} role="menu"
                                         >
-                                            <a
-                                                href="/profile"
-                                                 class="block px-4 py-2 text-sm text-gray-700 hover:text-[#ff6923]"
-                                                role="menuitem"
-                                                on:click={handleLinkClick}
-                                            >
-                                                Your Profile
-                                            </a>
-                                            <button
-                                                on:click={handleSignOut}
-                                                 class="block px-4 py-2 text-sm text-gray-700 hover:text-[#ff6923]"
-                                                role="menuitem"
-                                            >
-                                                Sign out
-                                            </button>
+                                            <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                                                <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleLinkClick}>
+                                                    Profile
+                                                </a>
+                                                <button type="button" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleSignOut} >
+                                                    Sign off
+                                                </button>
+                                            </div>
                                         </div>
                                     {/if}
                                 </div>
                             {:else}
                                 <button
-                                    on:click={() => goto('/login')}
+                                    onclick={() => goto('/login')}
                                     class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
                                 >
                                     Sign in
@@ -275,7 +252,7 @@
                 </div>
                 <div class="md:hidden ml-auto">
                     <button
-                        on:click={toggleProjectMenu}
+                        onclick={toggleProjectMenu}
                         class="text-gray-600 hover:text-gray-900 transition-colors p-2 relative w-[20px] h-[20px]"
                         aria-label="Toggle menu"
                     >
@@ -287,7 +264,7 @@
             </div>
         </div>
     </div>
-    <div 
+    <div
         class={`md:hidden fixed inset-0 z-50 bg-zinc-100 px-8 transition-all duration-300 ease-in-out ${
             isProjectMenuOpen || isProfileMenuOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'
         }`}
@@ -321,7 +298,7 @@
                             Your Profile
                         </a>
                         <button
-                            on:click={handleSignOut}
+                            onclick={handleSignOut}
                             class="block text-2xl text-gray-600 hover:text-gray-900 transition-colors"
                         >
                             Sign out
@@ -329,7 +306,7 @@
                     </div>
                 {:else}
                     <button
-                        on:click={() => goto('/login')}
+                        onclick={() => goto('/login')}
                         class="text-2xl text-gray-600 hover:text-gray-900 transition-colors"
                     >
                         Sign in

@@ -32,8 +32,8 @@
           // { name: 'Email Service', included: false },
           // { name: 'Booking Calendar', included: false },
           ],
-          cta: 'Get Started',
-          upgradeCta: 'Current',
+          cta: 'Join Starter Kit',
+          upgradeCta: 'Change to Starter Kit',
       },
       {
           name: 'Pro Connect',
@@ -51,7 +51,7 @@
           // { name: 'Booking Calendar', included: false },
           ],
           cta: 'Join Pro Connect Yearly',
-          upgradeCta: 'Current',
+          upgradeCta: 'Join Pro Connect Yearly',
       },
       {
           name: 'Master Craftsman',
@@ -68,7 +68,7 @@
           // { name: 'Booking Calendar', included: false },
           ],
           cta: 'Join Pro Connect Yearly',
-          upgradeCta: 'Current',
+          upgradeCta: 'Join Pro Connect Yearly',
       },
       {
           name: 'Elite Contractor',
@@ -95,24 +95,25 @@
     import { page } from '$app/stores';
     let isLoggedIn = false;
     let isPro = false;
-    
+    export let userSubscription;
     $: {
         // isLoggedIn = !!$page.data.session;
         // isPro = !!$page.data.session?.user?.isPro;
         // userSubscription = $page.data.session?.user?.subscription || '';
     }
+    console.log(userSubscription);
     
   </script>
   
  
   <div class="">
-      <div class="mx-auto max-w-screen-7xl px-2 pb-32">
-        <div class="isolate mx-auto mt-16 grid w-full grid-cols-1 md:grid-cols-4 lg:gap-x-4 xl:gap-x-4">
+      <div class="mx-auto max-w-screen-7xl px-2 pb-32 pt-1">
+        <div class="isolate mx-auto mt-16 grid w-full grid-cols-1 md:grid-cols-4 gap-x-6">
           {#each pricingTiers as tier}
               <div
                class={`rounded-3xl px-6 py-8 ring-1 ring-gray-200 ${
                  tier.highlight
-                   ? 'bg-white shadow-xl ring-2 ring-burnt-orange'
+                   ? 'relative overflow-visible rounded-3xl shadow-xl ring-0 ring-gray-300 before:absolute before:-inset-4 before:blur-[25px] before:bg-gradient-to-br before:from-green-400/15 before:via-teal-600/15 before:to-orange-400/15 before:-z-50 after:absolute after:inset-0 after:bg-[#f8f7f3] after:-z-40 after:rounded-3xl'
                    : 'bg-white/60'
                }`}
               >
@@ -138,8 +139,8 @@
                         ? 'bg-[#ff4500] text-white hover:bg-opacity-90'
                          : 'bg-zinc-200 text-slate-800 hover:bg-zinc-300'
                     }`}
-               >
-                  {isLoggedIn && ((isPro && tier.price > 0) || (!isPro && tier.price === 0)) ? tier.upgradeCta : tier.cta}
+               >  {tier.name === userSubscription ? "Current Plan" : tier.upgradeCta}
+                  
                 </button>
                 <div class="w-full h-px bg-gray-200 my-6"></div>
               <ul class="space-y-1 text-xs leading-6 text-gray-600">
@@ -179,3 +180,37 @@
         </div>
       </div>
   </div>
+
+  <style>
+    .highlight {
+      .pricing-tier {
+    padding-bottom: 6rem; /* pb-24 */
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); /* shadow-xl */
+    position: relative; /* for the pseudo-elements */
+}
+
+.pricing-tier::before {
+    content: '';
+    position: absolute;
+    top: -1rem; /* -inset-4 */
+    right: -1rem; /* -inset-4 */
+    bottom: -1rem; /* -inset-4 */
+    left: -1rem; /* -inset-4 */
+    filter: blur(25px); /* blur-[25px] */
+    background: linear-gradient(to bottom right, rgba(74, 222, 128, 0.1), rgba(20, 184, 166, 0.1), rgba(255, 165, 0, 0.1)); /* from-green-400/10, via-teal-600/10, to-orange-400/10 */
+    z-index: -50; /* -z-50 */
+}
+
+.pricing-tier::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: #f8f7f3; /* bg-[#f8f7f3] */
+    z-index: -40; /* -z-40 */
+    border-radius: 0.5rem; /* rounded-xl */
+}
+    }
+  </style>

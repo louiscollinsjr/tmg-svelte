@@ -2,22 +2,30 @@
 <script lang="ts">
     import PricingTiers from '../components/PricingTiers.svelte';
     import ProjectList from '../components/ProjectList.svelte';
-    import { page } from '$app/state';
 
-    
-    let session = $derived(page.data.session);
-    let userData = $derived(page.data.userData);
-    console.log('Find work Session:', session, 'Find workUser data:', userData);
+    import { onMount } from 'svelte';
+    import type { PageData } from './$types';
 
-    let pendingProjects = page.data.pendingProjects;
-   console.log('Pending projects:',page.data.pendingProjects);
-    
+    export let data: PageData;
+    let { userData, session, pendingProjects } = data;
+
+
+    // let data = parent();
+
+    // Access data from page.data using $derived
+    // let session = $derived(page.data.session);
+    // let userData = $derived(page.data.userData);
+    // let pendingProjects = $derived(page.data.pendingProjects);
+
+    console.log('Find work Session:', session);
+    console.log('Find work User data:', userData);
+
     console.log('Pending projects:', pendingProjects);
 
 </script>
 
 <div class="min-h-screen py-40">
-    {#if session?.user && userData.isPro}
+    {#if session?.user && userData?.isPro}
     <div class="">
 		<div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
 			<div class="text-center">
@@ -125,7 +133,7 @@
 				<p class="mt-4 text-lg text-gray-600">Select the perfect plan for your business needs</p>
 			</div>
 			<div class="mt-16">
-				<PricingTiers />
+				<PricingTiers userSubscription={userData?.subscription} />
 			</div>
 		</div>
 	</div>
