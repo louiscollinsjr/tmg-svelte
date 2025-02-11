@@ -2,21 +2,25 @@
 <script lang="ts">
     import PricingTiers from '../components/PricingTiers.svelte';
     import ProjectList from '../components/ProjectList.svelte';
-
+    import { MagnifyingGlass } from 'phosphor-svelte';
     import { onMount } from 'svelte';
     import type { PageData } from './$types';
 	import BackgroundPattern from '../components/BackgroundPattern.svelte';
 
     export let data: PageData;
     let { userData, session, pendingProjects } = data;
-
-
-    // let data = parent();
-
-    // Access data from page.data using $derived
-    // let session = $derived(page.data.session);
-    // let userData = $derived(page.data.userData);
-    // let pendingProjects = $derived(page.data.pendingProjects);
+    let searchQuery = '';
+    
+    $: filteredProjects = pendingProjects.filter(project => {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+            project.title?.toLowerCase().includes(searchLower) ||
+            project.description?.toLowerCase().includes(searchLower) ||
+            project.city?.toLowerCase().includes(searchLower) ||
+            project.state?.toLowerCase().includes(searchLower) ||
+            project.skills?.some(skill => skill.toLowerCase().includes(searchLower))
+        );
+    });
 
     console.log('Find work Session:', session);
     console.log('Find work User data:', userData);
@@ -83,18 +87,28 @@
 	</div>
         <!-- Authenticated Pro users see pending projects -->
         <div class="mx-auto max-w-6xl px-4">
-            <div>
-                <!-- Search Projects-->
-                 
+            <div class="px-12 mb-10">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <MagnifyingGlass size={18} class="text-gray-700" />
+                    </div>
+                    <input
+                        type="text"
+                        bind:value={searchQuery}
+                        placeholder="Search by skill, location, room..."
+                        class="block w-full pl-10 pr-3 py-3 border-2 border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 sm:text-sm placeholder:font-thin placeholder:text-gray-700"
+                    />
+                </div>
             </div>
+            
             <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-2xl px-12">Recent Projects</h2>
             <p class="mt-4 text-lg text-gray-500 px-12">Here are the latest projects matching your skills.</p>
             
             <div class="mt-8">
-                {#if pendingProjects.length > 0}
-                    <ProjectList projects={pendingProjects} />
+                {#if filteredProjects.length > 0}
+                    <ProjectList projects={filteredProjects} />
                 {:else}
-                    <p class="text-gray-500 px-10">No projects available at the moment. Check back soon!</p>
+                    <p class="text-gray-500 px-10">No projects match your search. Try different keywords!</p>
                 {/if}
             </div>
         </div>
