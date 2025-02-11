@@ -150,7 +150,10 @@ export const load: PageServerLoad = async () => {
                 categoryName: service.categoryName,
                 _id: service._id ? service._id.toString() : undefined
             })),
-            businessInfo: pro.businessInfo || {},
+            businessInfo: pro.businessInfo ? {
+                ...pro.businessInfo,
+                _id: pro.businessInfo._id ? pro.businessInfo._id.toString() : undefined
+            } : {},
             image: pro.image,
             isFavorite: pro.isFavorite || false,
             projectImages: pro.projectImages.map(img => ({
