@@ -318,14 +318,14 @@
 												>
 											</div>
 										</div>
-										<div class="flex-col-3 flex items-center gap-3 pt-2 text-[11px] text-gray-400">
-											<button
-                                            title="Helpful">
-                                                <ThumbsUp size={13} />
-                                            </button>|<button
-                                            title="Report">
-                                                Report
-                                            </button>
+										<div class="flex-col-3 flex items-center gap-3 pt-2 text-xs text-gray-400">
+											<button class="flex items-center gap-1">
+												<ThumbsUp size={13} weight="duotone" />
+												<span class="text-[11px] text-gray-400">Helpful</span>
+											</button>
+											|
+											<button class="text-[11px] text-gray-400">Report</button> 
+                                            <!-- <button class="text-[11px] text-gray-400 cursor-pointer" on:click={() => {}}>Write a review</button> -->
 										</div>
 									</div>
 								</div>

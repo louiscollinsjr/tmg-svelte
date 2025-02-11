@@ -1,7 +1,7 @@
 <!-- src/routes/components/ProjectList.svelte -->
 <script lang="ts">
     import { enhance } from '$app/forms';
-    import { CaretDown } from 'phosphor-svelte';
+    import { CaretDown, MapPin } from 'phosphor-svelte';
 
     export let projects: Array<{
         _id: string;
@@ -43,39 +43,45 @@
             day: 'numeric'
         });
     }
+
+    function calculateAge(dateString: string) {
+        return Math.floor((new Date() - new Date(dateString)) / (1000 * 60 * 60 * 24));
+    }
 </script>
 
 <section class="space-y-4 max-w-5xl mx-auto">
     {#each projects as project (project._id)}
-        <div class="bg-gray-50 rounded-sm border-b border-gray-200 overflow-hidden pb-8">
+        <div class="bg-white overflow-hidden p-8  border-2 rounded-xl border-gray-200">
             <!-- Project Header - Always visible -->
-            <div
-                class="p-0cursor-pointer hover:bg-gray-50 transition-colors"
+            <button
+                class="p-0 cursor-pointer transition-colors w-full"
                 on:click={() => toggleProject(project._id)}
             >
-                <div class="flex items-center justify-between px-8">
-                    <div class="flex-1 max-w-xl">
-                        <h3 class="text-lg font-medium text-gray-900">{project.title}</h3>
-                        <p class="mt-1 text-sm text-gray-500 line-clamp-2">{project.description}</p>
+                <div class="flex items- justify-between px-0">
+                    <div class="flex-1 max-w-xl text-left">
+                        <h3 class="text-lg font-medium text-gray-900 text-left">{project.title}</h3>
+                        <p class="mt-1 text-sm text-gray-500 line-clamp-2 text-left">{project.description}</p>
                     </div>
                     <div class="ml-4 flex items-center space-x-4">
                         <div class="text-right">
-                            <p class="text-sm font-medium text-gray-900">{formatCurrency(project.budget)}</p>
-                            <p class="text-sm text-gray-500">{project.city}, {project.state}</p>
+                            <!-- days old-->
+                            <dd class="text-sm font-roboto text-gray-700 font-light">Posted {calculateAge(project.createdAt)} days ago</dd>
+                            <p class="text-sm font-medium text-gray-900 mt-4">Budget: {formatCurrency(project.budget)}</p>
+                            <p class="text-xs text-gray-500 mt-2"><MapPin class="w-3 h-3 inline-block mr-1" />{project.city}, {project.state}</p>
                         </div>
                         <span class:rotate-180={expandedProjectId === project._id} class="transform transition-transform duration-200">
-                            <CaretDown
+                            <!-- <CaretDown
                                 size={20}
                                 class="text-gray-400"
-                            />
+                            /> -->
                         </span>
                     </div>
                 </div>
-            </div>
+            </button>
 
             <!-- Expanded Content -->
             {#if expandedProjectId === project._id}
-                <div class="border-t border-gray-100 px-8 pt-4 mt-4 bg-gray-50">
+                <div class="border-t border-gray-100 px-0 pt-4 mt-4 bg-white">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Project Details -->
                         <div>
@@ -87,7 +93,7 @@
                                 </div>
                                 <div>
                                     <dt class="text-sm text-gray-500">Posted</dt>
-                                    <dd class="text-sm text-gray-900">{formatDate(project.createdAt)}</dd>
+                                    <dd class="text-sm text-gray-900"> {calculateAge(project.createdAt)} days ago</dd>
                                 </div>
                                 {#if project.client?.name}
                                     <div>
@@ -131,7 +137,7 @@
                             <input type="hidden" name="projectId" value={project._id} />
                             <button
                                 type="submit"
-                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                             >
                                 Accept Job
                             </button>
@@ -139,7 +145,7 @@
                         {#if project.client?.email}
                             <a
                                 href="mailto:{project.client.email}?subject=Regarding%20Project:%20{encodeURIComponent(project.title)}"
-                                class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                                class="inline-flex items-center px-4 py-2 border-0 border-gray-300 text-sm font-medium rounded-md text-gray-700"
                             >
                                 Contact Client
                             </a>

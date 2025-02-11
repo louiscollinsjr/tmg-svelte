@@ -60,7 +60,7 @@
 ];
 
 </script>
-<BackgroundPattern opacity="0.05" patternClassName="bg-[#ffffff]/100" />
+<!-- <BackgroundPattern opacity="0.05" patternClassName="bg-[#ffffff]/100" /> -->
 <div class="relative z-10 min-h-screen py-40">
    
     {#if session?.user && userData?.isPro}
@@ -83,14 +83,18 @@
 	</div>
         <!-- Authenticated Pro users see pending projects -->
         <div class="mx-auto max-w-6xl px-4">
-            <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl px-20">Available Projects</h2>
-            <p class="mt-4 text-lg text-gray-500 px-20">Here are the latest projects matching your skills.</p>
+            <div>
+                <!-- Search Projects-->
+                 
+            </div>
+            <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-2xl px-12">Recent Projects</h2>
+            <p class="mt-4 text-lg text-gray-500 px-12">Here are the latest projects matching your skills.</p>
             
             <div class="mt-8">
                 {#if pendingProjects.length > 0}
                     <ProjectList projects={pendingProjects} />
                 {:else}
-                    <p class="text-gray-500 px-20">No projects available at the moment. Check back soon!</p>
+                    <p class="text-gray-500 px-10">No projects available at the moment. Check back soon!</p>
                 {/if}
             </div>
         </div>
