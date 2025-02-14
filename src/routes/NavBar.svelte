@@ -224,13 +224,16 @@
                                     </button>
 
                                     {#if isProfileMenuOpen}
-                                        <div transition:fade class="absolute right-0 mt-2 w-48 rounded-md shadow-xl z-10 bg-white ring-1 ring-black ring-opacity-5 z-[1000]"
+                                        <div tabindex="-1" role="menu" transition:fade class="absolute right-0 mt-2 w-48 rounded-md shadow-xl z-10 bg-white ring-1 ring-black ring-opacity-5 z-[1000]"
                                             onmouseenter={handleMouseEnter}
-                                            onmouseleave={handleMouseLeave} role="menu"
+                                            onmouseleave={handleMouseLeave}
                                         >
                                             <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                                                 <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleLinkClick}>
                                                     Profile
+                                                </a>
+                                                <a href="/messages" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleLinkClick}>
+                                                   Messages
                                                 </a>
                                                 <button type="button" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleSignOut} >
                                                     Sign off

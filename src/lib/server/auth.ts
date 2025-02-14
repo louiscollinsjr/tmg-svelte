@@ -8,7 +8,7 @@ import Email from "@auth/core/providers/email";
 import Apple from "@auth/core/providers/apple";
 import CredentialsProvider from "@auth/core/providers/credentials";
 import { verifyPassword, hashPassword } from "./auth-utils";
-import { getUserModel } from './models/User';
+import { getUserModel } from './models/user';
 
 const uri = MONGODB_URI;
 const client = new MongoClient(uri);

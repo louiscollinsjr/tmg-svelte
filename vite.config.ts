@@ -12,6 +12,15 @@ export default defineConfig({
 			outdir: './src/lib/paraglide'
 		})
 	],
+	server: {
+		port: 5177,
+		strictPort: true,
+		hmr: {
+			protocol: 'ws',
+			host: 'localhost',
+			port: 5177
+		}
+	},
 	ssr: {
 		noExternal: ['@inlang/paraglide-js'],
 		external: ['mongoose']

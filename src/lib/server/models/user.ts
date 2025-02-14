@@ -49,17 +49,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['Starter Kit', 'Pro Connect', 'Master Craftsman', 'Elite Contractor'],
         default: 'Starter Kit'
-    },
-    passwordHash: String,
-    emailVerified: Date
+    }
 }, {
     timestamps: true
 });
 
-export type UserDocument = mongoose.Document & {
+export interface UserDocument extends mongoose.Document {
     email: string;
     name: string;
-    image: string;
+    image?: string;
     isPro: boolean;
     providers: Array<{
         name: string;
@@ -82,14 +80,18 @@ export type UserDocument = mongoose.Document & {
     status: 'active' | 'inactive' | 'suspended';
     createdAt: Date;
     updatedAt: Date;
-};
+}
 
 let User: Model<UserDocument>;
 
 // This is to prevent errors with hot module reloading
 export function getUserModel(): Model<UserDocument> {
     if (!User) {
-        User = mongoose.models.User || mongoose.model<UserDocument>('User', userSchema);
+        try {
+            User = mongoose.model<UserDocument>('User');
+        } catch (e) {
+            User = mongoose.model<UserDocument>('User', userSchema);
+        }
     }
     return User;
 }
