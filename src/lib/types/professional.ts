@@ -88,6 +88,7 @@ export interface Professional {
         $date: string;
     };
     isFavorite?: boolean;
+    isSaved?: boolean;
     rating?: number;
     reviewCount?: number;
     projectImages?: string[];
@@ -156,6 +157,7 @@ export function transformProfessional(data: any): Professional {
         rating: data.rating || 0,
         reviewCount: data.reviewCount || 0,
         isFavorite: data.isFavorite || false,
+        isSaved: data.isSaved || false,
         categories: data.categories || [],
         ...data
     };

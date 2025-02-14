@@ -87,6 +87,6 @@
 
     <!-- {/* Professionals Grid */} -->
     <section class="mx-auto max-w-7xl px-4 pb-24 sm:px-[22px]">
-        <ProfessionalsGrid professionals={filteredProfessionals} {selectedCategory} />
+        <ProfessionalsGrid data={data} professionals={filteredProfessionals} {selectedCategory} />
     </section>
 </div>

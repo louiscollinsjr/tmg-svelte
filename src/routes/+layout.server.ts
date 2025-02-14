@@ -1,6 +1,9 @@
 import type { LayoutServerLoad } from './$types';
 import { getUserModel } from '$lib/server/models/user';
+import { getUserSavedItemModel } from '$lib/server/models/userSavedItem';
+import type { UserSavedItem } from '$lib/server/models/userSavedItem';
 import mongoose from 'mongoose';
+import type { ObjectId } from 'mongodb';
 
 function serializeDocument(doc: any): any {
 	if (!doc) return doc;
@@ -51,9 +54,25 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 			console.log('LayoutServer Load: Found user by email:', userData);
 		}
 
+		let savedItems: UserSavedItem[] = [];
+
+		if (userData?._id) {
+			// Fetch user's saved items using mongoose model
+			const UserSavedItem = getUserSavedItemModel();
+			savedItems = await UserSavedItem.find({ 
+				userId: userData._id
+			}).lean();
+		}
+
 		return {
 			session,
 			userData: serializeDocument(userData),
+			savedItems: savedItems.map(item => ({
+				...item,
+				_id: item._id.toString(),
+				userId: item.userId.toString(),
+				itemId: item.itemId.toString()
+			}))
 		};
 	} catch (e) {
 		console.error('Error loading layout:', e);

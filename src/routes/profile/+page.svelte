@@ -8,10 +8,16 @@
 	import type { PageData } from './$types';
     import { enhance } from '$app/forms';
     import { invalidateAll } from '$app/navigation';
+    import { auth } from '$lib/stores';
+    import { get } from 'svelte/store';
 
+	
 	export let data: PageData;
+    let { userData, session, pendingProjects, reviews } = data;
+	console.log('Profile Session:', session);
+	console.log('Profile userData:', userData);
 
-    $: ({ session, userData, projects, reviews } = data);
+   // $: ({ session, userData, projects, reviews } = data);
 
     let archiveForm: HTMLFormElement;
 
@@ -24,6 +30,48 @@
             }
         }
     }
+
+	async function handleHelpfulClick(e: Event, reviewId: string) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		if (!session?.user?.email) {
+			// Handle not logged in state - you might want to show a login prompt
+			console.log('Please log in to mark reviews as helpful');
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/reviews/${reviewId}/helpful`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				console.error('Server error:', error);
+				throw new Error(error.error || 'Failed to update helpful status');
+			}
+
+			const result = await response.json();
+			console.log('Helpful update result:', result);
+
+			await invalidateAll();
+		} catch (error) {
+			console.error('Error updating helpful status:', error);
+		}
+	}
+
+	// Helper function to check if a review is marked as helpful by the current user
+	function isReviewHelpful(review: any) {
+		if (!review?.helpful?.users || !userData?._id) return false;
+		return review.helpful.users.some((userId: string) => 
+			userId === userData._id.toString() || 
+			userId.$oid === userData._id.toString()
+		);
+	}
 
 	function formatDate(dateStr: string) {
 		return new Date(dateStr).toLocaleDateString('en-US', {
@@ -319,9 +367,17 @@
 											</div>
 										</div>
 										<div class="flex-col-3 flex items-center gap-3 pt-2 text-xs text-gray-400">
-											<button class="flex items-center gap-1">
-												<ThumbsUp size={13} weight="duotone" />
-												<span class="text-[11px] text-gray-400">Helpful</span>
+											<button 
+												class="flex items-center gap-1 {isReviewHelpful(review) ? 'text-blue-500' : ''}"
+												on:click={(e) => handleHelpfulClick(e, review._id?.$oid || review._id)}
+											>
+												<ThumbsUp 
+													size={13} 
+													weight={isReviewHelpful(review) ? "fill" : "duotone"} 
+												/>
+												<span class="text-[11px] {isReviewHelpful(review) ? 'text-blue-500' : 'text-gray-400'}">
+													Helpful {#if review.helpful?.count}({review.helpful.count}){/if}
+												</span>
 											</button>
 											|
 											<button class="text-[11px] text-gray-400">Report</button> 
