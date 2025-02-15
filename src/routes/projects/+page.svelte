@@ -158,15 +158,32 @@
 		<div class="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
 			{#if activeTab === 'in-progress'}
 				{#each projects.inProgress as project}
-					<ProjectCard {project} viewProject={viewProject} dateField="startDate" />
+					<ProjectCard 
+						{project} 
+						viewProject={viewProject} 
+						dateField="updatedAt" 
+						ctaText={project.contractor ? '' : 'Find Pro'}
+						ctaUrl={project.contractor ? '' : '/find-pro'}
+					/>
 				{/each}
 			{:else if activeTab === 'completed'}
 				{#each projects.completed as project}
-					<ProjectCard {project} viewProject={viewProject} dateField="completionDate" />
+					<ProjectCard 
+						{project} 
+						viewProject={viewProject} 
+						dateField="updatedAt" 
+						ctaText="Leave a Review"
+						ctaUrl="/leave-review"
+					/>
 				{/each}
 			{:else if activeTab === 'archived'}
 				{#each projects.archived as project}
-					<ProjectCard {project} viewProject={viewProject} dateField="updatedAt" />
+					<ProjectCard 
+                        {project} 
+                        viewProject={viewProject} 
+                        dateField="updatedAt"
+                        ctaText="Delete Project"
+						ctaUrl="/delete-project" />
 				{/each}
 			{:else}
 				{#each projects.reviews as review}
