@@ -17,6 +17,10 @@ const projectSchema = new Schema({
         ref: 'User',
         required: true
     },
+    owner: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
     title: {
         type: String,
         required: true
@@ -67,6 +71,7 @@ export function getProjectModel(): Model<ProjectDocument> {
 export interface ProjectDocument {
     contractor: mongoose.Types.ObjectId;
     client: mongoose.Types.ObjectId;
+    owner?: mongoose.Types.ObjectId;
     title: string;
     description?: string;
     category: string;

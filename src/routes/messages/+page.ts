@@ -1,7 +1,7 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({ fetch, parent }) => {
+export const load: PageLoad = async ({ fetch, parent, url }) => {
     // Get the layout data which includes user information
     const { userData, session } = await parent();
     
@@ -33,10 +33,30 @@ export const load: PageLoad = async ({ fetch, parent }) => {
             count: conversations.length,
             ids: conversations.map((c: any) => c._id)
         });
+
+        // Get conversation ID from URL if present
+        const conversationId = url.searchParams.get('id');
+        let selectedConversation = null;
+
+        if (conversationId) {
+            // Load specific conversation if ID is provided
+            const convResponse = await fetch(`/api/conversations/${conversationId}`);
+            if (convResponse.ok) {
+                selectedConversation = await convResponse.json();
+            }
+        } else if (conversations.length > 0) {
+            // Load most recent conversation by default
+            const mostRecent = conversations[0]; // Assuming conversations are sorted by date
+            const convResponse = await fetch(`/api/conversations/${mostRecent._id}`);
+            if (convResponse.ok) {
+                selectedConversation = await convResponse.json();
+            }
+        }
         
         return {
             conversations,
-            userData
+            userData,
+            selectedConversation
         };
     } catch (e) {
         if (e.status === 302) throw e;

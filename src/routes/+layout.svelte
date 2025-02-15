@@ -34,13 +34,17 @@
 </script>
 
 <ParaglideJS {i18n}>
-    {#if $page.url.pathname !== '/auth/signup' && $page.url.pathname !== '/login'}
+    {#if $page.url.pathname !== '/auth/signup' && 
+        $page.url.pathname !== '/login' && 
+        !$page.url.pathname.startsWith('/messages')}
         <NavBar {session} {userData} />
     {/if}
     <main class="min-h-screen max-w-screen mx-auto bg-zinc-50">
         <slot />
     </main>
-    {#if $page.url.pathname !== '/auth/signup' && $page.url.pathname !== '/login'}
+    {#if $page.url.pathname !== '/auth/signup' && 
+        $page.url.pathname !== '/login' && 
+        !$page.url.pathname.startsWith('/messages')}
         <Footer />
     {/if}
 </ParaglideJS>

@@ -145,8 +145,8 @@ async function saveProject(formData: ProjectFormData, user: any) {
 
         // Create a new project using the form data and user ID
         const project = new Project({
-            contractor: userData._id,
-            client: userData._id,
+            contractor: null, // Will be assigned later when a contractor accepts the project
+            client: userData._id, // The current user is the client
             title: formData.projectTypes || "New Project",
             description: formData.description || '',
             category: formData.projectTypes, // Use projectTypes as category ID
@@ -163,6 +163,13 @@ async function saveProject(formData: ProjectFormData, user: any) {
 
         // Save the project
         const savedProject = await project.save();
+        
+        console.log('Project saved:', {
+            id: savedProject._id,
+            client: savedProject.client,
+            status: savedProject.status
+        });
+        
         return savedProject;
     } catch (error) {
         console.error('Error saving project:', error);

@@ -224,18 +224,31 @@
                                     </button>
 
                                     {#if isProfileMenuOpen}
-                                        <div tabindex="-1" role="menu" transition:fade class="absolute right-0 mt-2 w-48 rounded-md shadow-xl z-10 bg-white ring-1 ring-black ring-opacity-5 z-[1000]"
+                                        <div tabindex="-1" role="menu" transition:fade class="absolute right-0 mt-2 w-48 rounded-lg shadow-2xl z-10 bg-white ring-1 ring-black ring-opacity-5 z-[1000]"
                                             onmouseenter={handleMouseEnter}
                                             onmouseleave={handleMouseLeave}
                                         >
                                             <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                                                <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleLinkClick}>
+                                                <a href="/messages" class="block px-4 py-4 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleLinkClick}>
+                                                    Messages
+                                                 </a>
+                                                 <a href="/projects" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleLinkClick}>
+                                                    Projects
+                                                 </a>
+                                                 <a href="/favorites" class="block px-4 py-4 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleLinkClick}>
+                                                    Favorites
+                                                 </a>
+                                                 <a href="/account" class="border-t block px-4 py-5 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleLinkClick}>
+                                                    Account
+                                                 </a>
+                                                 <a href="/profile" class="block px-4 py-2 pb-5 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleLinkClick}>
                                                     Profile
                                                 </a>
-                                                <a href="/messages" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleLinkClick}>
-                                                   Messages
-                                                </a>
-                                                <button type="button" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleSignOut} >
+                                                <a href="/help-center" class="border-t block px-4 py-5 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleLinkClick}>
+                                                   Help Center
+                                                 </a>
+                                               
+                                                <button type="button" class="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" onclick={handleSignOut} >
                                                     Sign off
                                                 </button>
                                             </div>
