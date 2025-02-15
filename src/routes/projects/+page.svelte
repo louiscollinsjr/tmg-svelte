@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { fade } from 'svelte/transition';
 	import { HouseLine } from 'phosphor-svelte';
+	import ProjectCard from './ProjectCard.svelte';
 
 	export let data;
 
@@ -54,10 +55,10 @@
 
 				<div class="mt-4 md:mt-4">
 					<a
-						href="#"
+						href="/start-project"
 						class="text-thin inline-block rounded-lg bg-[#ff6923] px-5 py-3 font-roboto text-xs font-medium tracking-wide text-white transition"
 					>
-						Start a project
+						Start a new project
 					</a>
 				</div>
 			</div>
@@ -84,8 +85,8 @@
 				Time to start your first project and bring your ideas to life.
 			</p>
 			<button
-				on:click={handleCreateProject}
 				class="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+				on:click={() => goto('/start-project')}
 			>
 				Start a project
 			</button>
@@ -154,163 +155,22 @@
 		</div>
 
 		<!-- Project Grid -->
-		<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+		<div class="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
 			{#if activeTab === 'in-progress'}
 				{#each projects.inProgress as project}
-					<button
-						class="cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-shadow hover:shadow-md"
-						on:click={() => viewProject(project._id)}
-					>
-						<div class="aspect-w-16 aspect-h-9">
-							<img
-								src={project.thumbnail || '/default-project.png'}
-								alt={project.title}
-								class="object-cover"
-							/>
-						</div>
-						<div class="p-4">
-							<h3 class="font-medium text-gray-900">{project.title}</h3>
-							<div class="mt-1 text-sm text-gray-500">
-								Started {formatDate(project.startDate)}
-							</div>
-							<div class="mt-4 flex items-center justify-between">
-								<div class="flex items-center">
-									<div class="flex-shrink-0">
-										<img
-											class="h-8 w-8 rounded-full"
-											src={project.client?.image || '/default-image.png'}
-											alt={project.client?.name || 'Client'}
-										/>
-									</div>
-									<div class="ml-2">
-										<p class="text-sm font-medium text-gray-900">
-											{project.client?.name || 'Client'}
-										</p>
-									</div>
-								</div>
-								<div class="text-sm text-gray-500">
-									{project.status}
-								</div>
-							</div>
-						</div>
-					</button>
+					<ProjectCard {project} viewProject={viewProject} dateField="startDate" />
 				{/each}
 			{:else if activeTab === 'completed'}
 				{#each projects.completed as project}
-					<button
-						class="cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-shadow hover:shadow-md"
-						on:click={() => viewProject(project._id)}
-					>
-						<div class="aspect-w-16 aspect-h-9">
-							<img
-								src={project.thumbnail || '/default-project.png'}
-								alt={project.title}
-								class="object-cover"
-							/>
-						</div>
-						<div class="p-4">
-							<h3 class="font-medium text-gray-900">{project.title}</h3>
-							<div class="mt-1 text-sm text-gray-500">
-								Completed {formatDate(project.completionDate)}
-							</div>
-							<div class="mt-4 flex items-center justify-between">
-								<div class="flex items-center">
-									<div class="flex-shrink-0">
-										<img
-											class="h-8 w-8 rounded-full"
-											src={project.client?.image || '/default-image.png'}
-											alt={project.client?.name || 'Client'}
-										/>
-									</div>
-									<div class="ml-2">
-										<p class="text-sm font-medium text-gray-900">
-											{project.client?.name || 'Client'}
-										</p>
-									</div>
-								</div>
-								<div class="text-sm font-medium text-green-600">Completed</div>
-							</div>
-						</div>
-					</button>
+					<ProjectCard {project} viewProject={viewProject} dateField="completionDate" />
 				{/each}
 			{:else if activeTab === 'archived'}
 				{#each projects.archived as project}
-					<button
-						class="cursor-pointer overflow-hidden rounded-lg bg-white opacity-75 shadow-sm transition-shadow hover:shadow-md"
-						on:click={() => viewProject(project._id)}
-					>
-						<div class="aspect-w-16 aspect-h-9 bg-gray-100">
-							<img
-								src={project.thumbnail || '/default-project.png'}
-								alt={project.title}
-								class="object-cover"
-							/>
-						</div>
-						<div class="p-4">
-							<h3 class="font-medium text-gray-900">{project.title}</h3>
-							<div class="mt-1 text-sm text-gray-500">
-								Archived {formatDate(project.updatedAt)}
-							</div>
-							<div class="mt-4 flex items-center justify-between">
-								<div class="flex items-center">
-									<div class="flex-shrink-0">
-										<img
-											class="h-8 w-8 rounded-full"
-											src={project.client?.image || '/default-image.png'}
-											alt={project.client?.name || 'Client'}
-										/>
-									</div>
-									<div class="ml-2">
-										<p class="text-sm font-medium text-gray-900">
-											{project.client?.name || 'Client'}
-										</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</button>
+					<ProjectCard {project} viewProject={viewProject} dateField="updatedAt" />
 				{/each}
 			{:else}
 				{#each projects.reviews as review}
-					<button
-						class="cursor-pointer overflow-hidden rounded-lg bg-white shadow-sm transition-shadow hover:shadow-md"
-						on:click={() => viewProject(review.project._id)}
-					>
-						<div class="p-4">
-							<div class="mb-4 flex items-center">
-								<div class="flex-shrink-0">
-									<img
-										class="h-10 w-10 rounded-full"
-										src={review.reviewer?.image || '/default-image.png'}
-										alt={review.reviewer?.name || 'Reviewer'}
-									/>
-								</div>
-								<div class="ml-3">
-									<p class="text-sm font-medium text-gray-900">
-										{review.reviewer?.name || 'Reviewer'}
-									</p>
-									<p class="text-sm text-gray-500">{formatDate(review.date)}</p>
-								</div>
-							</div>
-							<div class="mb-2 flex items-center">
-								{#each Array(5) as _, i}
-									<svg
-										class="h-5 w-5 {i < review.rating ? 'text-yellow-400' : 'text-gray-300'}"
-										fill="currentColor"
-										viewBox="0 0 20 20"
-									>
-										<path
-											d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-										/>
-									</svg>
-								{/each}
-							</div>
-							<p class="text-sm text-gray-600">{review.comment}</p>
-							<div class="mt-4 border-t border-gray-200 pt-4">
-								<h4 class="text-sm font-medium text-gray-900">{review.project.title}</h4>
-							</div>
-						</div>
-					</button>
+					<ProjectCard project={review.project} viewProject={viewProject} dateField="date" />
 				{/each}
 			{/if}
 		</div>
