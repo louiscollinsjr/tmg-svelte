@@ -36,7 +36,9 @@
 <ParaglideJS {i18n}>
     {#if $page.url.pathname !== '/auth/signup' && 
         $page.url.pathname !== '/login' && 
-        !$page.url.pathname.startsWith('/messages')}
+        !$page.url.pathname.startsWith('/messages') &&
+        !$page.url.pathname.startsWith('/leave-review') &&
+        !$page.url.pathname.startsWith('/find-pro')}
         <NavBar {session} {userData} />
     {/if}
     <main class="min-h-screen max-w-screen mx-auto bg-zinc-50">
@@ -44,7 +46,8 @@
     </main>
     {#if $page.url.pathname !== '/auth/signup' && 
         $page.url.pathname !== '/login' && 
-        !$page.url.pathname.startsWith('/messages')}
+        !$page.url.pathname.startsWith('/messages') &&
+        !$page.url.pathname.startsWith('/leave-review')}
         <Footer />
     {/if}
 </ParaglideJS>

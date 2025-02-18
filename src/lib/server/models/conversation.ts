@@ -1,37 +1,42 @@
 import { Schema, model, type Model } from 'mongoose';
 import type { UserDocument } from './user';
 import type { ImageDocument } from './image';
+import type { ProjectDocument } from './project';
 
 interface ConversationMessage {
-    sender: 'to' | 'from';
+    sender: string;
     content?: string;
     timestamp: Date;
     read: boolean;
     type: 'message' | 'question' | 'quote' | 'image';
     imageIds?: ImageDocument[];
+    projectId?: ProjectDocument;
 }
 
 interface ConversationDocument {
     toId: UserDocument;
     fromId: UserDocument;
     messages: ConversationMessage[];
+    projectId?: ProjectDocument;
     createdAt: Date;
     updatedAt: Date;
 }
 
 const messageSchema = new Schema({
-    sender: { type: String, enum: ['to', 'from'], required: true },
+    sender: { type: String, required: true },
     content: { type: String },
     timestamp: { type: Date, default: Date.now },
     read: { type: Boolean, default: false },
     type: { type: String, enum: ['message', 'question', 'quote', 'image'], default: 'message' },
     imageIds: [{ type: Schema.Types.ObjectId, ref: 'Image' }],
+    projectId: { type: Schema.Types.ObjectId, ref: 'Project' },
 });
 
 const conversationSchema = new Schema({
     toId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     fromId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     messages: [messageSchema],
+    projectId: { type: Schema.Types.ObjectId, ref: 'Project' },
 }, {
     timestamps: true
 });

@@ -10,7 +10,8 @@ const projectSchema = new Schema({
     contractor: {
         type: Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: false,
+        default: null
     },
     client: {
         type: Schema.Types.ObjectId,
@@ -19,7 +20,8 @@ const projectSchema = new Schema({
     },
     owner: {
         type: Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        required: true
     },
     title: {
         type: String,
@@ -69,9 +71,9 @@ export function getProjectModel(): Model<ProjectDocument> {
 }
 
 export interface ProjectDocument {
-    contractor: mongoose.Types.ObjectId;
+    contractor?: mongoose.Types.ObjectId;
     client: mongoose.Types.ObjectId;
-    owner?: mongoose.Types.ObjectId;
+    owner: mongoose.Types.ObjectId;
     title: string;
     description?: string;
     category: string;

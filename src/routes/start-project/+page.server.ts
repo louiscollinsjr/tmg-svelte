@@ -145,18 +145,21 @@ async function saveProject(formData: ProjectFormData, user: any) {
 
         // Create a new project using the form data and user ID
         const project = new Project({
-            contractor: null, // Will be assigned later when a contractor accepts the project
-            client: userData._id, // The current user is the client
-            title: formData.projectTypes || "New Project",
+            owner: userData._id, // The current user is the owner
+            client: userData._id, // The current user is also the client
+            contractor: undefined, // Explicitly set as undefined
+            title: formData.title || "New Project",
             description: formData.description || '',
-            category: formData.projectTypes, // Use projectTypes as category ID
+            category: formData.category, // Use the selected category
             status: 'pending',
             budget: budget,
             timeline: timeline,
             images: [], // Handle image uploads later
-            city: formData.city || '',
-            state: formData.state || '',
-            zipcode: formData.zipcode || '',
+            location: {
+                city: formData.city || '',
+                state: formData.state || '',
+                zipcode: formData.zipcode || ''
+            },
             createdAt: new Date(),
             updatedAt: new Date()
         });
@@ -166,7 +169,7 @@ async function saveProject(formData: ProjectFormData, user: any) {
         
         console.log('Project saved:', {
             id: savedProject._id,
-            client: savedProject.client,
+            owner: savedProject.owner,
             status: savedProject.status
         });
         

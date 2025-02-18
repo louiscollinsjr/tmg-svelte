@@ -7,6 +7,9 @@
 	import { get } from 'svelte/store';
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
+    import { goto } from '$app/navigation';
+    import { page } from '$app/stores';
+    import { enhance } from '$app/forms';
 
 	export let data: PageData;
 	export let professionals: Professional[] = data?.professionals || [];
@@ -14,19 +17,7 @@
 
 	let session;
 
-	// Check if a professional is saved
-	function isProfessionalSaved(professionalId: string): boolean {
-		if (!data?.savedItems || !professionalId) return false;
-		return data.savedItems.some(item => 
-			item.itemId === (professionalId?.$oid || professionalId) && 
-			item.itemType === 'User'
-		);
-	}
-
-	$: professionals = professionals.map(prof => ({
-		...prof,
-		isSaved: isProfessionalSaved(prof._id?.$oid || prof._id as string)
-	}));
+	let savedItems = data.savedItems || [];
 
 	async function handleSave(e: Event, professionalId: string) {
 		e.preventDefault();
@@ -57,12 +48,69 @@
 			const result = await response.json();
 			console.log('Save result:', result);
 
+			// Update the savedItems array
+			if (savedItems.includes(professionalId)) {
+				savedItems = savedItems.filter((id) => id !== professionalId);
+			} else {
+				savedItems = [...savedItems, professionalId];
+			}
+
 			// Refresh the page data to update the UI
 			await invalidateAll();
 		} catch (error) {
 			console.error('Error saving professional:', error);
 		}
 	}
+
+	function isProfessionalSaved(id: string) {
+		return savedItems.includes(id);
+	}
+
+    async function requestEstimate(professionalId: string) {
+        const userId = data.userData?._id;
+
+        // Check URL for projectId
+        const urlParams = new URLSearchParams(window.location.search);
+        let projectId = urlParams.get('projectId');
+
+        if (!projectId) {
+            // Fallback to last project created with null contractor
+            const activeProject = data.pendingProjects?.find(project => project.contractor === null);
+            projectId = activeProject?._id;
+        }
+
+        console.log('Requesting estimate with userId:', userId, 'professionalId:', professionalId, 'projectId:', projectId);
+
+        if (!userId) {
+            console.error('User is not logged in');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/conversations/estimate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    tradespersonId: professionalId,
+                    userId: userId, // Pass userId
+                    projectId: projectId // Pass projectId if available
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create conversation');
+            }
+
+            const result = await response.json();
+            // Redirect to messages with the new conversation
+            goto(`/messages?conversation=${result.conversationId}`);
+        } catch (error) {
+            console.error('Error requesting estimate:', error);
+            // TODO: Show error notification
+        }
+    }
 
 	onMount(async () => {
 		session = get(auth);
@@ -77,29 +125,29 @@
 
 	console.log('ProfessionalsGrid - data:', data);
 
-	// $: {
-	//     console.log('ProfessionalsGrid - Selected Category:', selectedCategory);
-	//     console.log('ProfessionalsGrid - Input Professionals:', professionals);
-	// }
+	$: professionals = professionals.map(prof => ({
+		...prof,
+		isSaved: isProfessionalSaved(prof._id?.$oid || prof._id as string)
+	}));
 </script>
 
 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 	{#each professionals as professional (professional._id?.$oid || professional._id)}
-		<a href={`/profile/${professional._id}`} class="relative block">
-			<div
-				class="relative h-full rounded-lg bg-gray-100 p-4 py-3 pb-16 pr-3 transition-colors hover:bg-gray-50"
-			>
+		<div
+			class="relative h-full rounded-lg bg-gray-100 p-4 py-3 pb-16 pr-3 transition-colors hover:bg-gray-50"
+		>
+			<a href={`/profile/${professional._id}`} class="relative block">
 				<div class="mb-3 flex items-center">
 					<div class="relative h-16 w-16 flex-shrink-0">
 						{#if professional.image}
 							<img
 								src={professional.image}
 								alt={professional.name}
-								class="absolute inset-0 h-full w-full rounded-full border-2 border-white object-cover shadow-sm"
+								class="absolute inset-0 h-full w-full rounded-lg border-2 border-white object-cover shadow-lg"
 							/>
 						{:else}
 							<div
-								class="absolute inset-0 flex h-full w-full items-center justify-center rounded-full bg-orange-500 font-medium text-white shadow-sm"
+								class="absolute inset-0 flex h-full w-full items-center justify-center rounded-lg bg-orange-500 font-medium text-white shadow-sm"
 							>
 								{professional.name
 									.split(' ')
@@ -158,23 +206,24 @@
 						</div>
 					</div>
 				{/if}
-
+		</a>
+			
 				<button
-					class="absolute bottom-3 left-3 rounded-lg bg-gray-200/80 px-6 py-1 font-roboto text-xs font-normal text-gray-400 transition-colors hover:bg-gray-800"
-				>
-					Get Estimate
-				</button>
+                    class="absolute bottom-3 left-3 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 px-6 py-2 font-roboto text-xs font-normal text-white transition-colors hover:bg-orange-500"
+                    on:click={() => requestEstimate(professional._id?.$oid || professional._id)}
+                >
+                    Request Estimate
+                </button>
 				<button
 					class="absolute bottom-3 right-3 rounded-full p-2 transition-colors hover:bg-gray-100"
 					on:click={(e) => handleSave(e, professional._id?.$oid || professional._id as string)}
 				>
 					{#if isProfessionalSaved(professional._id?.$oid || professional._id as string)}
-						<Heart weight="fill" class="h-3 w-3 text-red-500" />
+						<Heart weight="fill" class="h-3 w-3 text-orange-500" />
 					{:else}
 						<Heart class="h-3 w-3 text-gray-400/40" />
 					{/if}
 				</button>
 			</div>
-		</a>
 	{/each}
 </div>

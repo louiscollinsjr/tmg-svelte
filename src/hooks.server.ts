@@ -19,6 +19,13 @@ const handleDatabase: Handle = async ({ event, resolve }) => {
     return await resolve(event);
 };
 
+    /**
+     * Handles authentication for the server.
+     * Skips authentication for error routes.
+     * @param {import('@sveltejs/kit').RequestEvent} event - The request event.
+     * @param {import('@sveltejs/kit').Resolve} resolve - The resolve function.
+     * @returns {Promise<import('@sveltejs/kit').Response>} - The response.
+     */
 export const handleAuth: Handle = async ({ event, resolve }) => {
     // Skip authentication for error routes
     if (event.url.pathname.startsWith('/auth/error')) {

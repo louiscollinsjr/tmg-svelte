@@ -173,7 +173,7 @@
 						viewProject={viewProject} 
 						dateField="updatedAt" 
 						ctaText="Leave a Review"
-						ctaUrl="/leave-review"
+						ctaUrl={`/leave-review?projectId=${project._id}`}
 					/>
 				{/each}
 			{:else if activeTab === 'archived'}

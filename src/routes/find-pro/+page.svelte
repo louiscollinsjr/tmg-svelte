@@ -16,7 +16,7 @@
     <div class="bg-white">
         <!-- Hero Section -->
         <div class="relative isolate overflow-hidden ">
-            <div class="mx-auto max-w-7xl pb-24 pt-10 sm:pb-32 lg:px-8 lg:py-40">
+            <div class="mx-auto max-w-7xl pb-24 pt-10 sm:pb-32 lg:px-8">
                 <!--icon navigation bar -->
                 <div class="flex items-center justify-between p-6">
                     <button class="p-3 rounded-full bg-gray-100 hover:bg-gray-200" on:click={() => history.back()}>
@@ -48,7 +48,7 @@
 
         <!-- Professionals Grid -->
         <section class="mx-auto max-w-7xl px-4 pb-24 sm:px-[22px">
-            <div class="pb-24 border-b border-gray-200">
+            <div class="pb-24 border-b border-gray-200 px-10">
             <ProfessionalsGrid {data} professionals={data.professionals} selectedCategory={data.selectedCategory.slug} />
             </div>
             <p class="text-[9pt] text-gray-500 pt-2">Can't find a tradesperson here? <a href="/help-center" class="underline">Visit the Help Center</a></p>

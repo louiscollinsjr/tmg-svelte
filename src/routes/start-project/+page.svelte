@@ -362,7 +362,7 @@
 								>
 									<option value="">Select a project type</option>
 									{#each categories as category}
-										<option value={category.id}>
+										<option value={category.slug}>
 											{category.name} {#if category.icon}<span class="text-gray-500">({category.icon})</span>{/if}
 										</option>
 									{/each}
@@ -384,7 +384,7 @@
 							</div>
 							{#if $form.category}
 								{#each categories as category}
-									{#if category.id === $form.category}
+									{#if category.slug === $form.category}
 										<p class="mt-1 text-sm text-gray-500">{category.description}</p>
 									{/if}
 								{/each}
