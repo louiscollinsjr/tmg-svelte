@@ -41,7 +41,7 @@
 	</div>
 
 	<section
-		class="mb-24 grid max-h-56 grid-cols-5 overflow-hidden rounded-2xl border border-gray-200 bg-gray-50"
+		class="mb-24 grid max-h-56 grid-cols-5 overflow-hidden rounded-lg border border-gray-200 bg-gray-50"
 	>
 		<div class="col-span-2 p-0 pr-12">
 			<div class="max-w-xl p-4 pl-8 text-left">
@@ -93,7 +93,7 @@
 		</div>
 	{:else}
 		<!-- Tabs -->
-		<div class="mb-6 border-0 border-gray-200 pb-4">
+		<div class="mb-12 border-0 border-gray-200 pb-4">
 			<nav class="flex space-x-8">
 				<button
 					class="medium py-0.5 text-[10pt] font-normal
@@ -155,7 +155,7 @@
 		</div>
 
 		<!-- Project Grid -->
-		<div class="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
+		<div class="grid grid-cols-1 gap-20 sm:grid-cols-2 lg:grid-cols-3 border-b border-gray-200 pb-12">
 			{#if activeTab === 'in-progress'}
 				{#each projects.inProgress as project}
 					<ProjectCard 
@@ -163,7 +163,7 @@
 						viewProject={viewProject} 
 						dateField="updatedAt" 
 						ctaText={project.contractor ? '' : 'Find Pro'}
-						ctaUrl={project.contractor ? '' : '/find-pro'}
+						ctaUrl={project.contractor ? '' : `/find-pro?projectId=${project._id}`}
 					/>
 				{/each}
 			{:else if activeTab === 'completed'}
@@ -191,5 +191,6 @@
 				{/each}
 			{/if}
 		</div>
+		<p class="text-[9pt] text-gray-500 pt-2">Can't find a professional here? <a href="/help-center" class="underline"> Visit the Help Center</a></p>
 	{/if}
 </div>
